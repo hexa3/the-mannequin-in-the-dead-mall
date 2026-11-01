@@ -43,8 +43,8 @@ button:focus-visible{outline:2px solid #6b84ff;outline-offset:2px}
 #lkNotes{width:100%;margin-top:34px;display:flex;flex-direction:column;gap:8px}
 .note{width:100%;text-align:left;background:rgba(36,40,44,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:11px 14px;display:flex;gap:11px;animation:dropin .4s cubic-bezier(.2,.9,.3,1.2) both}
 .note .nt{flex:1;min-width:0}
-.note .nh{display:flex;justify-content:space-between;font-size:13px;color:#aab1b6}
-.note .nh b{color:#eceeee;font-weight:600}
+.nh{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#aab1b6}
+.nh b{color:#eceeee;font-weight:600}
 .note .nb{font-size:14.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfe2e3}
 .lk-hint{margin-top:auto;margin-bottom:18px;color:#5f676c;font-size:13px;letter-spacing:.3px}
 
@@ -125,7 +125,8 @@ button:focus-visible{outline:2px solid #6b84ff;outline-offset:2px}
 
 /* banner */
 #banner{position:absolute;top:calc(48px + env(safe-area-inset-top));left:10px;right:10px;background:rgba(32,36,40,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:11px 13px;transform:translateY(-160%);transition:transform .38s cubic-bezier(.2,.9,.3,1.15);z-index:30;display:flex;gap:11px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-#banner.show{transform:translateY(0)}
+#banner{visibility:hidden;opacity:0}
+#banner.show{transform:translateY(0);visibility:visible;opacity:1;transition:transform .38s cubic-bezier(.2,.9,.3,1.15),opacity .2s}
 #banner .nt{flex:1;min-width:0}
 #banner b{font-size:14px}
 #banner .nb{font-size:14px;color:#d6dadc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
