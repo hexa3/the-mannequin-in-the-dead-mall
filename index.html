@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030405">
+<title>The Mannequin in the Dead Mall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030405; --screen:#0a0c0e; --panel:#101316; --line:#1c2125; --text:#e8e6e2; --muted:#878e94;
+  --in:#1b1f23; --out:#2d3f8c; --accent:#c9a64a; --danger:#c8463d; --ok:#41c172;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui);overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid #6b84ff;outline-offset:2px}
+[hidden]{display:none!important}
+
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 35%,#0c1113 0%,#030405 72%)}
+#phone{position:relative;width:100%;height:100%;background:var(--screen);overflow:hidden;display:flex;flex-direction:column;isolation:isolate}
+@media (min-width:620px) and (min-height:720px){
+  #phone{width:392px;height:min(846px,calc(100vh - 56px));border-radius:48px;box-shadow:0 0 0 10px #0f1113,0 0 0 11px #2a2d31,0 50px 140px #000,0 0 80px rgba(70,140,120,.05)}
+  #statusbar{padding-top:14px!important}
+}
+
+/* status bar */
+#statusbar{height:calc(44px + env(safe-area-inset-top));padding:calc(env(safe-area-inset-top) + 12px) 26px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;letter-spacing:.2px;flex:none;z-index:5;background:transparent}
+#statusbar .icons{display:flex;gap:6px;align-items:center}
+#statusbar svg{display:block}
+.screen{position:absolute;left:0;right:0;bottom:0;top:calc(44px + env(safe-area-inset-top));display:none;flex-direction:column}
+@media (min-width:620px) and (min-height:720px){ .screen{top:46px} }
+.screen.on{display:flex}
+
+/* lock */
+#lock{align-items:center;padding:20px 14px;background:radial-gradient(ellipse at 50% 0%,#0f1719 0%,#060809 60%)}
+.lk-date{margin-top:26px;font-size:17px;color:#b7bdc1;font-weight:500}
+.lk-time{font-size:84px;font-weight:200;letter-spacing:-2px;line-height:1;margin-top:4px;color:#eef0f0;font-variant-numeric:tabular-nums}
+#lkNotes{width:100%;margin-top:34px;display:flex;flex-direction:column;gap:8px}
+.note{width:100%;text-align:left;background:rgba(36,40,44,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:11px 14px;display:flex;gap:11px;animation:dropin .4s cubic-bezier(.2,.9,.3,1.2) both}
+.note .nt{flex:1;min-width:0}
+.note .nh{display:flex;justify-content:space-between;font-size:13px;color:#aab1b6}
+.note .nh b{color:#eceeee;font-weight:600}
+.note .nb{font-size:14.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfe2e3}
+.lk-hint{margin-top:auto;margin-bottom:18px;color:#5f676c;font-size:13px;letter-spacing:.3px}
+
+/* list */
+#list{background:var(--screen)}
+.lst-h{padding:10px 18px 12px;font-size:32px;font-weight:700;letter-spacing:-.5px}
+.thread{display:flex;gap:12px;padding:11px 18px;text-align:left;width:100%;border-bottom:1px solid var(--line);align-items:center}
+.thread:active{background:#121518}
+.thread .tx{flex:1;min-width:0}
+.thread .tn{display:flex;justify-content:space-between;font-weight:600;font-size:16px}
+.thread .tn span{font-weight:400;color:var(--muted);font-size:13px}
+.thread .tp{color:var(--muted);font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.thread .tp.ty{color:#9fb2ff;font-style:italic}
+.thread .ub{min-width:20px;height:20px;border-radius:10px;background:#3d63ff;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:16px;flex:none}
+.av.mira{background:linear-gradient(135deg,#b35a3c,#6e2f22);color:#ffe7dc}
+.av.unk{background:#2a2f34;color:#9aa3a9}
+.thread .av{width:50px;height:50px;font-size:20px}
+
+/* chat */
+#chat{background:var(--screen)}
+.hdr{display:flex;align-items:center;gap:10px;padding:6px 10px 8px;border-bottom:1px solid var(--line);background:rgba(12,14,16,.96);flex:none;z-index:3}
+.back{position:relative;width:34px;height:38px;display:grid;place-items:center;font-size:30px;line-height:1;color:#7d95ff;font-weight:300}
+.badge{position:absolute;top:2px;left:20px;background:#3d63ff;color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 5px}
+.hinfo{flex:1;min-width:0}
+#hName{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hStatus{font-size:12.5px;color:var(--muted);margin-top:1px}
+#hStatus.ty{color:#9fb2ff}
+.ibtn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#9aa3a9}
+.ibtn:hover{background:#15191c}
+#mapBtn{color:var(--accent)}
+#mapBtn.pulse{animation:pulse 1.6s ease-in-out 4}
+#callbar{display:none;align-items:center;gap:8px;background:#0f3a22;color:#bdf0cf;font-size:12.5px;padding:6px 14px;flex:none;z-index:3;border-bottom:1px solid #134a2c}
+#callbar.on{display:flex}
+#callbar .dot{width:7px;height:7px;border-radius:50%;background:#4ee38a;animation:blink 1.2s infinite}
+#callbar .ct{margin-left:auto;font-variant-numeric:tabular-nums;opacity:.8}
+.body{position:relative;flex:1;min-height:0}
+#wall{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.055;transition:opacity .4s}
+#wall svg{position:absolute;bottom:4%;height:58%;width:auto}
+.msgs{position:absolute;inset:0;overflow-y:auto;padding:14px 12px 10px;display:none;flex-direction:column;gap:3px;overscroll-behavior:contain;scroll-behavior:smooth}
+.msgs.on{display:flex}
+.msgs::-webkit-scrollbar{width:0}
+.b{max-width:78%;padding:8px 12px 9px;border-radius:19px;font-size:15.5px;line-height:1.33;word-wrap:break-word;overflow-wrap:anywhere;animation:pop .24s cubic-bezier(.2,.9,.3,1.25) both;white-space:pre-wrap}
+.b.in{align-self:flex-start;background:var(--in);border-bottom-left-radius:6px}
+.b.out{align-self:flex-end;background:var(--out);border-bottom-right-radius:6px;color:#f1f3ff}
+.b.in+.b.in,.b.out+.b.out{margin-top:0}
+.b.in:not(.b.in+.b.in),.b.out:not(.b.out+.b.out){margin-top:8px}
+.sys{align-self:center;font-size:12px;color:var(--muted);padding:6px 12px;text-align:center;max-width:90%;animation:fade .4s both}
+.sys.call{color:#7fd6a0}
+.tdiv{align-self:center;font-size:11.5px;color:#61686d;margin:14px 0 4px;font-weight:600;letter-spacing:.3px}
+.receipt{align-self:flex-end;font-size:11px;color:#6a7277;margin:2px 4px 0}
+.photo{padding:0;width:212px;max-width:70%;aspect-ratio:3/4;overflow:hidden;background:#000;cursor:zoom-in;border-radius:18px}
+.photo svg{width:100%;height:100%;display:block;transition:filter 1.1s ease}
+.photo.loading svg{filter:blur(14px) brightness(.55)}
+.voice{display:flex;align-items:center;gap:10px;min-width:210px}
+.vplay{width:32px;height:32px;border-radius:50%;background:#2c3238;display:grid;place-items:center;flex:none;font-size:12px}
+.wave{display:flex;align-items:center;gap:2px;height:26px;flex:1}
+.wave i{display:block;width:3px;border-radius:2px;background:#5b646b}
+.voice.playing .wave i{background:#9fb2ff;animation:wv .6s ease-in-out infinite alternate}
+.vdur{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.typing{align-self:flex-start;background:var(--in);border-radius:19px;border-bottom-left-radius:6px;padding:12px 14px;display:flex;gap:4px;margin-top:8px;animation:pop .2s both}
+.typing i{width:7px;height:7px;border-radius:50%;background:#7c858b;animation:td 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+
+#chips{display:flex;flex-direction:column;gap:7px;padding:8px 12px 4px;align-items:flex-end;flex:none}
+#chips:empty{display:none}
+.chip{border:1px solid #3a4fa8;color:#d3dbff;padding:9px 14px;border-radius:19px;max-width:88%;text-align:right;background:rgba(22,28,64,.75);animation:rise .32s cubic-bezier(.2,.9,.3,1.2) both;font-size:15px;line-height:1.3}
+.chip:hover{background:#1d2660;border-color:#5a70d8}
+.chip .n{opacity:.4;font-size:12px;margin-right:7px;font-variant-numeric:tabular-nums}
+#composer{display:flex;gap:8px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#0b0d0f;flex:none;align-items:center}
+#input{flex:1;min-height:38px;border-radius:19px;background:#15181b;border:1px solid #22272b;padding:9px 15px;color:#5d656a;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#input.on{color:var(--text)}
+#input.on::after{content:"";display:inline-block;width:1.5px;height:17px;background:#8aa0ff;vertical-align:-3px;margin-left:1px;animation:blink .8s infinite}
+#sendBtn{width:36px;height:36px;border-radius:50%;background:#1d2228;display:grid;place-items:center;color:#5d656a;transition:.2s}
+#sendBtn.on{background:#3d63ff;color:#fff}
+#waitNote{font-size:12px;color:#62696e;text-align:center;padding:4px 0 0;flex:none}
+
+/* banner */
+#banner{position:absolute;top:calc(48px + env(safe-area-inset-top));left:10px;right:10px;background:rgba(32,36,40,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:11px 13px;transform:translateY(-160%);transition:transform .38s cubic-bezier(.2,.9,.3,1.15);z-index:30;display:flex;gap:11px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#banner.show{transform:translateY(0)}
+#banner .nt{flex:1;min-width:0}
+#banner b{font-size:14px}
+#banner .nb{font-size:14px;color:#d6dadc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* map */
+#mapsheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;background:#0c0f11;border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform .4s cubic-bezier(.2,.9,.3,1);z-index:25;padding:10px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;border-top:1px solid #1f2529}
+#mapsheet.show{transform:translateY(0)}
+.grab{width:40px;height:5px;border-radius:3px;background:#2c3236;margin:0 auto 10px}
+.map-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.map-h b{font-size:15px}
+.map-h span{font-size:12px;color:var(--muted)}
+#mapWrap{border-radius:12px;overflow:hidden;border:1px solid #1d2326;background:#0b0e10}
+#mapWrap svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;font-size:12px;color:#8d969b;margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.closeMap{margin-top:12px;align-self:center;padding:9px 22px;border-radius:20px;background:#171b1e;color:#c7ccd0;font-size:14px}
+
+/* lightbox */
+#lightbox{position:absolute;inset:0;background:rgba(0,0,0,.94);display:none;z-index:40;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;padding:20px}
+#lightbox.on{display:flex;animation:fade .25s both}
+#lightbox .lbimg{width:100%;max-width:420px;aspect-ratio:3/4;border-radius:6px;overflow:hidden}
+#lightbox .lbimg svg{width:100%;height:100%;display:block}
+#lightbox .lbmeta{margin-top:12px;font-size:12px;color:#6b7378}
+
+/* title */
+#title{position:fixed;inset:0;z-index:100;background:#020303;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+#title .tbg{position:absolute;inset:0;opacity:.75}
+#title .tbg svg{width:100%;height:100%;display:block}
+#title::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,3,3,.2) 0%,rgba(2,3,3,.35) 40%,rgba(2,3,3,.92) 78%,#020303 100%);pointer-events:none}
+.tcontent{position:relative;z-index:2;width:100%;max-width:560px;padding:0 24px calc(44px + env(safe-area-inset-bottom));text-align:center}
+.kicker{font-size:11px;letter-spacing:3.5px;color:#7f8a84;text-transform:uppercase}
+#title h1{font-family:var(--serif);font-weight:500;font-size:clamp(44px,11vw,74px);line-height:.95;margin:16px 0 18px;color:#efe9df;letter-spacing:-.5px;text-shadow:0 0 40px rgba(0,0,0,.8)}
+#title h1 em{font-style:italic;font-weight:400;font-size:.62em;color:#b8ad98;display:block;margin:6px 0}
+.tsub{font-size:15px;line-height:1.55;color:#a5aaa8;max-width:380px;margin:0 auto}
+.tbtns{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn{padding:13px 30px;border-radius:30px;font-size:15px;font-weight:600;letter-spacing:.3px;border:1px solid #3b4144;color:#dfe2e0;transition:.2s}
+.btn:hover{background:#121516}
+.btn.primary{background:#e9e3d6;color:#0c0d0d;border-color:#e9e3d6}
+.btn.primary:hover{background:#fff}
+.fine{margin-top:22px;font-size:12px;color:#5d6563;line-height:1.6}
+#endFound{margin-top:10px;font-size:12px;color:#8a7d55;letter-spacing:.4px}
+
+/* credits */
+#credits{position:fixed;inset:0;z-index:90;background:#000;display:none;overflow:hidden;cursor:pointer}
+#credits.on{display:block;animation:fade 2.5s both}
+.roll{position:absolute;left:0;right:0;top:0;text-align:center;font-family:var(--serif);color:#e8e2d6;padding:0 20px;will-change:transform}
+.roll .big{font-size:clamp(34px,7vw,52px);font-weight:500;line-height:1.05;margin-bottom:10px}
+.roll .role{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#8b867c;font-family:var(--ui);margin-bottom:8px}
+.roll .name{font-size:24px;margin-bottom:4px}
+.roll .small{font-size:17px;color:#a29c90;font-style:italic;margin-bottom:4px}
+.roll .pair{display:flex;justify-content:center;gap:14px;font-size:22px;margin-bottom:6px}
+.roll .pair span:first-child{min-width:150px;text-align:right}
+.roll .pair span:last-child{min-width:150px;text-align:left;color:#a29c90;font-style:italic}
+.roll .pair.glitch span:last-child{color:#c9b9a0;animation:glitch 3.5s steps(1) infinite}
+.roll .gap{height:64px}
+.roll .end{font-size:30px;letter-spacing:12px;margin-top:20px}
+#crHint{position:absolute;right:16px;bottom:14px;font-size:11px;color:#3a3936;font-family:var(--ui);letter-spacing:1px}
+#crNote{position:absolute;top:18px;left:50%;width:min(370px,calc(100% - 24px));transform:translate(-50%,-180%);transition:transform .45s cubic-bezier(.2,.9,.3,1.2);background:rgba(36,40,44,.96);border-radius:18px;padding:12px 14px;display:flex;gap:11px;text-align:left;color:var(--text);font-family:var(--ui);z-index:3;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#crNote.show{transform:translate(-50%,0)}
+#crNote .nt{flex:1;min-width:0}
+#crNote b{font-size:14px}
+#crNote .nb{font-size:14px;color:#d6dadc;margin-top:2px}
+
+/* ending */
+#ending{position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#ending.on{display:flex;animation:fade 2s both}
+.en-in{max-width:420px;width:100%;text-align:center}
+.en-k{font-size:11px;letter-spacing:4px;color:#7a7f7c;text-transform:uppercase}
+#enName{font-family:var(--serif);font-weight:500;font-size:46px;margin:10px 0 8px;color:#efe9df}
+#enLine{font-family:var(--serif);font-style:italic;font-size:20px;color:#a9a497;line-height:1.35}
+#enList{margin:26px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;max-width:320px;text-align:left;font-size:13px;color:#5a605d}
+#enList .got{color:#c9b98a}
+#enList .cur{color:#fff}
+.en-btns{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.en-fine{margin-top:22px;font-size:12px;color:#565c59;font-style:italic;font-family:var(--serif);font-size:15px}
+#againPill{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));z-index:20;background:#e9e3d6;color:#0c0d0d;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes dropin{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes td{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pulse{50%{transform:scale(1.25);color:#ffe08a}}
+@keyframes wv{from{transform:scaleY(.4)}to{transform:scaleY(1)}}
+@keyframes glitch{0%{opacity:1}92%{opacity:1;transform:none}93%{opacity:.2;transform:translateX(3px)}95%{opacity:1;transform:translateX(-2px)}96%{transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="f-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.15 0 0 0 -.52"/></filter>
+  <filter id="f-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>
+  <filter id="f-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter>
+  <filter id="f-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2"/></filter>
+  <radialGradient id="g-vig" cx=".5" cy=".5" r=".72"><stop offset=".48" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".9"/></radialGradient>
+  <radialGradient id="g-flash" cx=".5" cy=".46" r=".62"><stop offset="0" stop-color="#f4f1ea" stop-opacity=".28"/><stop offset=".45" stop-color="#f4f1ea" stop-opacity=".07"/><stop offset="1" stop-color="#f4f1ea" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-skin" x1="0" x2="1"><stop offset="0" stop-color="#f2eadf"/><stop offset=".5" stop-color="#d4c8b7"/><stop offset="1" stop-color="#7a7063"/></linearGradient>
+  <linearGradient id="g-skinDim" x1="0" x2="1"><stop offset="0" stop-color="#bdb8ac"/><stop offset=".5" stop-color="#8e897e"/><stop offset="1" stop-color="#3d3a35"/></linearGradient>
+  <linearGradient id="g-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111b1b"/><stop offset="1" stop-color="#040606"/></linearGradient>
+  <linearGradient id="g-wallL" x1="0" x2="1"><stop offset="0" stop-color="#030404"/><stop offset="1" stop-color="#142121"/></linearGradient>
+  <linearGradient id="g-wallR" x1="1" x2="0"><stop offset="0" stop-color="#030404"/><stop offset="1" stop-color="#142121"/></linearGradient>
+  <linearGradient id="g-concL" x1="0" x2="1"><stop offset="0" stop-color="#040404"/><stop offset="1" stop-color="#1b1b18"/></linearGradient>
+  <linearGradient id="g-concR" x1="1" x2="0"><stop offset="0" stop-color="#040404"/><stop offset="1" stop-color="#1b1b18"/></linearGradient>
+  <linearGradient id="g-floorC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#181816"/><stop offset="1" stop-color="#050505"/></linearGradient>
+  <linearGradient id="g-warmL" x1="0" x2="1"><stop offset="0" stop-color="#110d0a"/><stop offset="1" stop-color="#3c3127"/></linearGradient>
+  <linearGradient id="g-warmR" x1="1" x2="0"><stop offset="0" stop-color="#110d0a"/><stop offset="1" stop-color="#3c3127"/></linearGradient>
+  <linearGradient id="g-warmF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#30271f"/><stop offset="1" stop-color="#0e0b09"/></linearGradient>
+  <radialGradient id="g-farglow"><stop offset="0" stop-color="#3f8f7a" stop-opacity=".38"/><stop offset="1" stop-color="#3f8f7a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-refl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fbf9a" stop-opacity=".2"/><stop offset="1" stop-color="#5fbf9a" stop-opacity="0"/></linearGradient>
+  <radialGradient id="g-exit"><stop offset="0" stop-color="#4dff9a" stop-opacity=".65"/><stop offset="1" stop-color="#4dff9a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-red"><stop offset="0" stop-color="#ff3b30" stop-opacity=".6"/><stop offset="1" stop-color="#ff3b30" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-beam" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6dd" stop-opacity=".3"/><stop offset=".6" stop-color="#fff6dd" stop-opacity=".07"/><stop offset="1" stop-color="#fff6dd" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-moon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc4e8" stop-opacity=".32"/><stop offset="1" stop-color="#9fc4e8" stop-opacity="0"/></linearGradient>
+  <radialGradient id="g-face" cx=".42" cy=".38" r=".72"><stop offset="0" stop-color="#fbf6ee"/><stop offset=".55" stop-color="#d5c9b8"/><stop offset="1" stop-color="#5a5247"/></radialGradient>
+  <radialGradient id="g-human" cx=".5" cy=".9" r=".85"><stop offset="0" stop-color="#e0cabb"/><stop offset=".5" stop-color="#7f6659"/><stop offset="1" stop-color="#1e1612"/></radialGradient>
+  <radialGradient id="g-phone"><stop offset="0" stop-color="#bfe3ff" stop-opacity=".75"/><stop offset="1" stop-color="#bfe3ff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-lamp"><stop offset="0" stop-color="#ffae4a" stop-opacity=".55"/><stop offset="1" stop-color="#ffae4a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-warm"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".4"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03050a"/><stop offset=".6" stop-color="#0e121c"/><stop offset="1" stop-color="#171a22"/></linearGradient>
+</defs></svg>
+
+<div id="stage">
+  <div id="phone">
+    <div id="statusbar">
+      <span id="sbTime">11:47</span>
+      <span class="icons" aria-hidden="true">
+        <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#e8e6e2"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#e8e6e2"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#e8e6e2"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#e8e6e2" opacity=".35"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" fill="none" stroke="#e8e6e2" opacity=".5"/><rect x="2" y="2" width="13" height="8" rx="1.6" fill="#e8e6e2"/><rect x="22.5" y="4" width="1.8" height="4" rx=".9" fill="#e8e6e2" opacity=".5"/></svg>
+      </span>
+    </div>
+
+    <div id="lock" class="screen">
+      <div class="lk-date" id="lkDate">Saturday, October 31</div>
+      <div class="lk-time" id="lkTime">11:47</div>
+      <div id="lkNotes"></div>
+      <div class="lk-hint" id="lkHint">tap a notification to open it</div>
+    </div>
+
+    <div id="list" class="screen">
+      <div class="lst-h">Messages</div>
+      <div id="threads"></div>
+    </div>
+
+    <div id="chat" class="screen">
+      <div class="hdr">
+        <button class="back" id="backBtn" aria-label="Back to messages">‹<span class="badge" id="backBadge" hidden></span></button>
+        <div class="av mira" id="hAv">M</div>
+        <div class="hinfo"><div id="hName">Mira</div><div id="hStatus">online</div></div>
+        <button class="ibtn" id="mapBtn" aria-label="Open mall directory" hidden>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>
+        </button>
+        <button class="ibtn" id="soundBtn" aria-label="Mute sound">
+          <svg id="sndOn" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+          <svg id="sndOff" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5m0-5-5 5"/></svg>
+        </button>
+      </div>
+      <div id="callbar"><span class="dot"></span><span id="cbLabel">Mira · voice call · muted on her end</span><span class="ct" id="cbTime">00:00</span></div>
+      <div class="body" id="chatBody">
+        <div id="wall" aria-hidden="true"></div>
+        <div class="msgs" id="m-mira" aria-live="polite"></div>
+        <div class="msgs" id="m-unk" aria-live="polite"></div>
+      </div>
+      <div id="chips"></div>
+      <div id="composer">
+        <div id="input">Text message</div>
+        <button id="sendBtn" aria-label="Send" tabindex="-1"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 4 11h5v10h6V11h5z"/></svg></button>
+      </div>
+    </div>
+
+    <button id="banner" aria-live="polite"></button>
+
+    <div id="mapsheet" role="dialog" aria-label="Mall directory">
+      <div class="grab"></div>
+      <div class="map-h"><b>fairhaven_directory_2009.jpg</b><span id="mapNote">pins are your own notes</span></div>
+      <div id="mapWrap"></div>
+      <div class="legend"><span><i style="background:#f1c94a"></i>Mira (last place she said)</span><span><i style="background:#e9e1d3;border-radius:1px;transform:rotate(45deg)"></i>where it was seen</span></div>
+      <button class="closeMap" id="closeMap">Close</button>
+    </div>
+
+    <div id="lightbox"><div class="lbimg" id="lbImg"></div><div class="lbmeta" id="lbMeta"></div></div>
+    <button id="againPill" hidden>Open the mall again</button>
+  </div>
+</div>
+
+<div id="title">
+  <div class="tbg" id="titleBg"></div>
+  <div class="tcontent">
+    <div class="kicker">Fairhaven Galleria · est. 1988 · closed 2011</div>
+    <h1>The Mannequin<em>in the</em>Dead Mall</h1>
+    <p class="tsub">A horror story told in a single text conversation. Headphones on. Lights off. About twenty minutes.</p>
+    <div class="tbtns">
+      <button class="btn primary" id="beginBtn">Begin</button>
+      <button class="btn" id="contBtn" hidden>Continue</button>
+    </div>
+    <div class="fine">Tap the chat to hurry a message along · keys 1–3 pick a reply<br>The mall still has its music on. You'll want to hear it.</div>
+    <div id="endFound"></div>
+  </div>
+</div>
+
+<div id="credits"><div class="roll" id="roll"></div><div id="crHint">click to hurry</div><button id="crNote"></button></div>
+
+<div id="ending" role="dialog" aria-label="Ending">
+  <div class="en-in">
+    <div class="en-k">Ending</div>
+    <h2 id="enName"></h2>
+    <p id="enLine"></p>
+    <div id="enList"></div>
+    <div class="en-btns"><button class="btn" id="enRead">Read the chat</button><button class="btn primary" id="enAgain">Open the mall again</button></div>
+    <p class="en-fine">The credits already rolled. You stayed anyway.</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   utilities
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const sleepRaw = ms => new Promise(r => setTimeout(r, ms));
+let hurryFn = null;
+function sleep(ms){
+  return new Promise(r => {
+    let done = false;
+    const fin = () => { if (done) return; done = true; clearTimeout(id); if (hurryFn === fin) hurryFn = null; r(); };
+    const id = setTimeout(fin, ms);
+    hurryFn = fin;
+  });
+}
+function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+function fmtClock(c){ const h = parseInt(c, 10); return c + (h === 11 ? ' PM' : ' AM'); }
+
+/* ============================================================
+   AUDIO — the mall's in-store music, synthesized
+   ============================================================ */
+const AU = (() => {
+  let ctx = null, master, sfxBus, musicIn, trem, mallFx, vibDepth, callGain, roomG, droneG, noiseBuf;
+  let sched = null, muted = false, inCall = false, tok = 0, warp = 1;
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  const gain = v => { const g = ctx.createGain(); g.gain.value = v; return g; };
+  const biq = (type, f, q) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; if (q != null) b.Q.value = q; return b; };
+  const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
+  function makeNoise(sec){ const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+  function makeBrown(sec){ const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate); const d = b.getChannelData(0); let last = 0; for (let i = 0; i < d.length; i++){ const w = Math.random() * 2 - 1; last = (last + .02 * w) / 1.02; d[i] = last * 3.5; } return b; }
+  function makeIR(sec, decay){ const len = ctx.sampleRate * sec, b = ctx.createBuffer(2, len, ctx.sampleRate); for (let c = 0; c < 2; c++){ const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay) * (i < 400 ? i / 400 : 1); } return b; }
+
+  function init(){
+    if (ctx){ if (ctx.state === 'suspended') ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC();
+    master = gain(muted ? 0 : 1);
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3;
+    master.connect(comp); comp.connect(ctx.destination);
+    sfxBus = gain(.85); sfxBus.connect(master);
+    noiseBuf = makeNoise(2);
+    // in-mall chain: instruments -> tremolo -> PA speaker -> huge empty reverb -> phone line
+    musicIn = gain(0); trem = gain(1);
+    const tl = osc('sine', 4.6), td = gain(.1); tl.connect(td); td.connect(trem.gain); tl.start();
+    trem.connect(musicIn);
+    mallFx = gain(1);
+    const vib = ctx.createDelay(.1); vib.delayTime.value = .02;
+    const vl = osc('sine', .31); vibDepth = gain(0); vl.connect(vibDepth); vibDepth.connect(vib.delayTime); vl.start();
+    const hp = biq('highpass', 150), lp = biq('lowpass', 5200), pk = biq('peaking', 1400, .8); pk.gain.value = 4;
+    const conv = ctx.createConvolver(); conv.buffer = makeIR(4.4, 2.3);
+    const dry = gain(.42), wet = gain(.95);
+    const callBus = gain(1), phHP = biq('highpass', 230), phLP = biq('lowpass', 3900);
+    callGain = gain(0);
+    musicIn.connect(vib); mallFx.connect(vib);
+    vib.connect(hp); hp.connect(lp); lp.connect(pk); pk.connect(dry); pk.connect(conv); conv.connect(wet);
+    dry.connect(callBus); wet.connect(callBus); callBus.connect(phHP); phHP.connect(phLP); phLP.connect(callGain); callGain.connect(master);
+    // your room at night
+    roomG = gain(0);
+    const rn = ctx.createBufferSource(); rn.buffer = makeBrown(4); rn.loop = true;
+    const rlp = biq('lowpass', 170); rn.connect(rlp); rlp.connect(roomG); roomG.connect(master); rn.start();
+    roomG.gain.setTargetAtTime(.045, ctx.currentTime, 2);
+    // dread drone (after the credits)
+    droneG = gain(0); const dlp = biq('lowpass', 320); droneG.connect(dlp); dlp.connect(master);
+    [[55,'sine',.5],[58.3,'sine',.45],[82.4,'triangle',.12],[110.6,'sine',.06]].forEach(([f,t,v]) => { const o = osc(t, f), g = gain(v); o.connect(g); g.connect(droneG); o.start(); });
+  }
+
+  /* ---------- instruments ---------- */
+  function ep(t, m, dur, v){
+    const f = mtof(m) * warp, g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .006);
+    g.gain.exponentialRampToValueAtTime(v * .33 + .0001, t + .38);
+    g.gain.setValueAtTime(v * .33 + .0001, t + dur);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur + .7);
+    const o1 = osc('sine', f), o2 = osc('sine', f * 2.002), g2 = gain(0), o3 = osc('sine', f * 4.03), g3 = gain(0);
+    g2.gain.setValueAtTime(v * .55, t); g2.gain.exponentialRampToValueAtTime(.0001, t + .32);
+    g3.gain.setValueAtTime(v * .16, t); g3.gain.exponentialRampToValueAtTime(.0001, t + .07);
+    o1.connect(g); o2.connect(g2); g2.connect(g); o3.connect(g3); g3.connect(g); g.connect(trem);
+    [o1,o2,o3].forEach(o => { o.start(t); o.stop(t + dur + .8); });
+  }
+  function pad(t, m, dur, v){
+    const f = mtof(m) * warp, g = ctx.createGain(), lp = biq('lowpass', 1050);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .45);
+    g.gain.setValueAtTime(v, t + dur); g.gain.linearRampToValueAtTime(0, t + dur + .9);
+    [-7, 7].forEach(dt => { const o = osc('sawtooth', f); o.detune.value = dt; o.connect(lp); o.start(t); o.stop(t + dur + 1); });
+    lp.connect(g); g.connect(musicIn);
+  }
+  function bassN(t, m, dur){
+    const f = mtof(m) * warp, g = ctx.createGain(), lp = biq('lowpass', 520);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.26, t + .01);
+    g.gain.exponentialRampToValueAtTime(.08, t + .3); g.gain.exponentialRampToValueAtTime(.0001, t + dur + .2);
+    const o = osc('triangle', f), o2 = osc('sine', f); o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(musicIn);
+    o.start(t); o2.start(t); o.stop(t + dur + .3); o2.stop(t + dur + .3);
+  }
+  function brush(t, v){
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; const bp = biq('bandpass', 7200, .7), g = ctx.createGain();
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + .07);
+    s.connect(bp); bp.connect(g); g.connect(musicIn); s.start(t, Math.random()); s.stop(t + .1);
+  }
+  function kick(t){
+    const o = osc('sine', 95), g = ctx.createGain();
+    o.frequency.setValueAtTime(95, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+    g.gain.setValueAtTime(.28, t); g.gain.exponentialRampToValueAtTime(.0001, t + .25);
+    o.connect(g); g.connect(musicIn); o.start(t); o.stop(t + .3);
+  }
+
+  /* ---------- songs ---------- */
+  const C = { Cmaj7:[55,59,60,64], Am7:[55,57,60,64], Dm7:[57,60,62,65], G7:[53,55,59,62], Fmaj7:[57,60,64,65], Em7:[55,59,62,64],
+    Bbmaj7:[57,58,62,65], Gm7:[53,58,62,65], C7:[55,58,60,64], Ebmaj7:[55,58,62,63], Cm7:[55,58,60,63], Abmaj7:[55,56,60,63],
+    Bb7:[56,58,62,65], Fm7:[56,60,63,65], Aadd9:[57,59,60,64], G6:[55,59,62,64], E7:[56,59,62,64] };
+  const SONGS = {
+    A: { name:'Sunlit Concourse', bpm:96, beats:4, seed:11, drums:1, kick:1, melStart:76, scale:[0,2,4,5,7,9,11],
+      prog:[[36,C.Cmaj7],[33,C.Am7],[38,C.Dm7],[31,C.G7],[41,C.Fmaj7],[40,C.Em7],[38,C.Dm7],[31,C.G7]],
+      comp:[[0,1,1],[1.5,.5,.7],[2.5,1.2,.8]], bass:[[0,0,1.4],[2,7,1],[3.5,-1,.4]] },
+    B: { name:'Escalator Dreams', bpm:86, beats:4, seed:23, drums:1, kick:0, melStart:77, scale:[5,7,9,10,0,2,4],
+      prog:[[41,C.Fmaj7],[34,C.Bbmaj7],[43,C.Gm7],[36,C.C7],[45,C.Am7],[38,C.Dm7],[43,C.Gm7],[36,C.C7]],
+      comp:[[0,1.4,.9],[2,.5,.6],[2.5,1.4,.7]], bass:[[0,0,1.5],[1.5,7,.5],[2,12,1],[3,7,1]] },
+    C: { name:'Food Court Rain', bpm:78, beats:4, seed:37, drums:1, kick:0, melStart:75, scale:[3,5,7,8,10,0,2],
+      prog:[[39,C.Ebmaj7],[36,C.Cm7],[44,C.Abmaj7],[34,C.Bb7],[41,C.Fm7],[34,C.Bb7],[39,C.Ebmaj7],[36,C.Cm7]],
+      comp:[[0,2,.9],[2,2,.7]], bass:[[0,0,2],[2,7,1.5],[3.5,12,.4]] },
+    closing: { name:'Thank You for Shopping', bpm:74, beats:3, seed:5, drums:0, kick:0, melStart:76, scale:[9,11,0,2,4,5,7],
+      prog:[[33,C.Aadd9],[41,C.Fmaj7],[36,C.Cmaj7],[43,C.G6],[38,C.Dm7],[45,C.Am7],[41,C.Fmaj7],[40,C.E7]],
+      comp:[[1,.9,.6],[2,.9,.5]], bass:[[0,0,2.8]] }
+  };
+  const RH4 = [[[0,1],[1,.5],[1.5,.5],[2,1.5],[3.5,.5]],[[0,1.5],[1.5,.5],[2,2]],[[0,.5],[.5,.5],[1,1],[2,1],[3,1]],[[0,2],[2.5,.5],[3,1]],[[.5,.5],[1,1],[2,.5],[2.5,1.5]]];
+  const RH3 = [[[0,2],[2,1]],[[0,1],[1,1],[2,1]],[[0,1.5],[1.5,.5],[2,1]],[[0,2.5]]];
+  function genMelody(d){
+    const r = rng(d.seed), L = d.prog.length;
+    const inScale = m => d.scale.includes(((m % 12) + 12) % 12);
+    const phrase = start => {
+      let prev = d.melStart; const out = [];
+      for (let i = 0; i < 4; i++){
+        const pcs = d.prog[(start + i) % L][1].map(m => m % 12);
+        const pats = d.beats === 3 ? RH3 : RH4;
+        let pat = pats[Math.floor(r() * pats.length)];
+        if (i === 3) pat = d.beats === 3 ? [[0,2.6]] : [[0,1.5],[2,1.8]];
+        const notes = [];
+        pat.forEach(([b, len]) => {
+          const strong = b === 0 || (d.beats === 4 && b === 2);
+          let cand = [];
+          for (let m = 64; m <= 86; m++){
+            if (!inScale(m)) continue;
+            const ct = pcs.includes(m % 12);
+            if (strong && !ct) continue;
+            const dist = Math.abs(m - prev); if (dist > 7) continue;
+            cand.push([m, (1 / (1 + dist)) * (ct ? 1.7 : 1)]);
+          }
+          if (!cand.length) cand = [[prev, 1]];
+          let sum = cand.reduce((a, c) => a + c[1], 0), x = r() * sum, pick = cand[0][0];
+          for (const c of cand){ x -= c[1]; if (x <= 0){ pick = c[0]; break; } }
+          prev = pick; notes.push([b, pick, len * .9]);
+        });
+        out.push(notes);
+      }
+      return out;
+    };
+    const p1 = phrase(0), p2 = phrase(4), p3 = phrase(4);
+    return [...p1, ...p2, ...p1, ...p3];
+  }
+  function playBar(s, t, spb){
+    const d = s.def, [bass, chord] = d.prog[s.bar % d.prog.length];
+    chord.forEach(m => pad(t, m, d.beats * spb, .011));
+    d.comp.forEach(([b, len, v]) => chord.forEach(m => ep(t + b * spb + Math.random() * .012, m, len * spb, v * .045)));
+    d.bass.forEach(([b, iv, len]) => bassN(t + b * spb, bass + iv, len * spb));
+    if (d.drums){ for (let i = 0; i < d.beats; i++){ brush(t + i * spb, i % 2 ? .05 : .022); brush(t + (i + .58) * spb, .014); } if (d.kick){ kick(t); kick(t + 2 * spb); } }
+    s.mel[s.bar % s.mel.length].forEach(([b, m, len]) => ep(t + b * spb, m, len * spb, .1));
+  }
+  function startSong(name){
+    stopSong();
+    const def = SONGS[name]; if (!def) return;
+    sched = { name, def, mel: genMelody(def), bar: 0, next: ctx.currentTime + .08 };
+    sched.timer = setInterval(tick, 40); tick();
+  }
+  function tick(){
+    const s = sched; if (!s) return;
+    const spb = 60 / (s.def.bpm * warp);
+    while (s.next < ctx.currentTime + .35){ playBar(s, s.next, spb); s.next += s.def.beats * spb; s.bar++; }
+  }
+  function stopSong(){ if (sched){ clearInterval(sched.timer); sched = null; } }
+  function ramp(param, v, sec){ const t = ctx.currentTime; param.cancelScheduledValues(t); param.setValueAtTime(param.value, t); param.linearRampToValueAtTime(v, t + sec); }
+
+  /* ---------- sfx ---------- */
+  function tone(f, t, dur, v, type = 'sine', dest = sfxBus){
+    const o = osc(type, f), g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + .05); return o;
+  }
+  function noiseHit(t, dur, v, f, type = 'bandpass', q = 1, dest = sfxBus){
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; const b = biq(type, f, q), g = ctx.createGain();
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(b); b.connect(g); g.connect(dest); s.start(t, Math.random()); s.stop(t + dur + .05);
+  }
+  function bell(f, t, v, dest){ tone(f, t, 2.4, v, 'sine', dest); tone(f * 2.76, t, 1.1, v * .25, 'sine', dest); tone(f * 5.4, t, .4, v * .08, 'sine', dest); }
+  function sfx(name){
+    if (!ctx) return; const t = ctx.currentTime + .01;
+    switch (name){
+      case 'recv': tone(1046, t, .12, .045); tone(1568, t + .075, .16, .04); break;
+      case 'buzz': { const lp = biq('lowpass', 300); lp.connect(sfxBus); [0, .3].forEach(dt => { const o = osc('square', 150), g = ctx.createGain(); g.gain.setValueAtTime(0, t + dt); g.gain.linearRampToValueAtTime(.09, t + dt + .02); g.gain.setValueAtTime(.09, t + dt + .17); g.gain.linearRampToValueAtTime(0, t + dt + .2); o.connect(g); g.connect(lp); o.start(t + dt); o.stop(t + dt + .25); }); tone(1046, t, .1, .02); break; }
+      case 'send': { const o = osc('sine', 520), g = ctx.createGain(); o.frequency.exponentialRampToValueAtTime(980, t + .09); g.gain.setValueAtTime(.04, t); g.gain.exponentialRampToValueAtTime(.0001, t + .13); o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + .15); break; }
+      case 'tick': noiseHit(t, .012, .025, 4200, 'highpass'); break;
+      case 'click': noiseHit(t, .03, .12, 1800, 'bandpass', .6); break;
+      case 'hang': [0, .28, .56].forEach(dt => tone(425, t + dt, .2, .045, 'sine')); break;
+      case 'chime': bell(784, t, .22, mallFx); bell(659.3, t + .6, .22, mallFx); bell(523.3, t + 1.2, .25, mallFx); break;
+      case 'clicks': { let x = t; for (let i = 0; i < 6; i++){ noiseHit(x, .02, .7, 2600, 'bandpass', 3, mallFx); noiseHit(x + .015, .012, .3, 900, 'bandpass', 2, mallFx); x += .55 + Math.random() * .35; } break; }
+      case 'alarm': { const bp = biq('bandpass', 1200, .8), g = gain(.05); bp.connect(g); g.connect(sfxBus); for (let i = 0; i < 18; i++){ const o = osc('square', i % 2 ? 760 : 980); o.connect(bp); o.start(t + i * .26); o.stop(t + i * .26 + .24); } noiseHit(t, 4.6, .03, 500, 'lowpass'); break; }
+      case 'sting': {
+        const o = osc('sine', 72), g = ctx.createGain(); o.frequency.exponentialRampToValueAtTime(26, t + 1.6);
+        g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.55, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + 2.2);
+        o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 2.3);
+        const lp = biq('lowpass', 300, 4); lp.frequency.setValueAtTime(300, t); lp.frequency.linearRampToValueAtTime(2200, t + 1.2); lp.frequency.linearRampToValueAtTime(250, t + 3);
+        const gg = gain(0); gg.gain.linearRampToValueAtTime(.05, t + .5); gg.gain.linearRampToValueAtTime(0, t + 3.2); lp.connect(gg); gg.connect(sfxBus);
+        [311.1, 329.6, 349.2, 370].forEach(f => { const s = osc('sawtooth', f); s.connect(lp); s.start(t); s.stop(t + 3.3); });
+        noiseHit(t, 1.4, .08, 400, 'lowpass');
+        break; }
+    }
+  }
+
+  /* ---------- public ---------- */
+  return {
+    init,
+    get ready(){ return !!ctx; },
+    setMuted(m){ muted = m; if (ctx) ramp(master.gain, m ? 0 : 1, .15); },
+    get muted(){ return muted; },
+    sfx,
+    callStart(track, o = {}){
+      if (!ctx) return; tok++; inCall = true;
+      warp = o.warped ? .93 : 1; vibDepth.gain.value = o.warped ? .0032 : 0;
+      sfx('click'); ramp(callGain.gain, 1, .2);
+      const begin = () => { if (!sched || sched.name !== track) startSong(track); ramp(musicIn.gain, 1, .3); };
+      if (o.chime){ const my = tok; ramp(musicIn.gain, 0, .05); stopSong(); sfx('chime'); setTimeout(() => { if (my === tok && inCall) begin(); }, 2700); }
+      else begin();
+    },
+    callEnd(silent){
+      if (!ctx) return; tok++; inCall = false;
+      callGain.gain.cancelScheduledValues(ctx.currentTime); callGain.gain.setValueAtTime(0, ctx.currentTime);
+      stopSong(); musicIn.gain.setValueAtTime(0, ctx.currentTime);
+      if (!silent) sfx('hang');
+    },
+    change(name, gap = 2600){
+      if (!ctx || !inCall) return; const my = ++tok;
+      ramp(musicIn.gain, 0, .45);
+      setTimeout(() => { if (my !== tok) return; stopSong(); setTimeout(() => { if (my !== tok || !inCall) return; startSong(name); ramp(musicIn.gain, 1, .25); }, gap); }, 480);
+    },
+    fadeMusic(sec){ if (!ctx) return; const my = ++tok; ramp(musicIn.gain, 0, sec); setTimeout(() => { if (my === tok) stopSong(); }, sec * 1000 + 50); },
+    voice(name){
+      if (!ctx) return;
+      if (name === 'muzak'){
+        if (inCall) return;
+        warp = 1; vibDepth.gain.value = 0;
+        if (!sched || sched.name !== 'A') startSong('A');
+        ramp(musicIn.gain, 1, .2); ramp(callGain.gain, .85, .2);
+        const my = tok; setTimeout(() => { if (!inCall && my === tok){ ramp(callGain.gain, 0, .4); setTimeout(() => { if (!inCall) stopSong(); }, 500); } }, 7000);
+      } else sfx(name);
+    },
+    drone(on){ if (ctx) ramp(droneG.gain, on ? .07 : 0, on ? 6 : 3); },
+    quiet(){ if (!ctx) return; ramp(roomG.gain, .02, 3); }
+  };
+})();
+
+/* ============================================================
+   PHOTOS — every picture Mira (or something) sends, drawn live
+   ============================================================ */
+const f1 = n => (+n).toFixed(1);
+const pts = a => a.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ');
+const poly = (a, fill, extra = '') => `<polygon points="${pts(a)}" fill="${fill}" ${extra}/>`;
+const ln = (a, b, c, w, extra = '') => `<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="${c}" stroke-width="${Math.max(.2, w).toFixed(2)}" ${extra}/>`;
+function wrap(inner, o = {}){
+  return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">${inner}${o.flash ? '<rect width="300" height="400" fill="url(#g-flash)"/>' : ''}<rect width="300" height="400" fill="url(#g-vig)"/><rect width="300" height="400" filter="url(#f-grain)" opacity="${o.grain ?? .5}"/></svg>`;
+}
+
+/* the mannequin. feet at (x,y), h = height in px */
+function mq(x, y, h, o = {}){
+  const s = h / 100, skin = o.dim ? 'url(#g-skinDim)' : 'url(#g-skin)';
+  const armL = `<path d="M-10.5,-79 C-14,-71 -15,-61 -14.5,-51 L-11.6,-50.5 C-11.5,-60 -10.8,-69 -8.6,-76Z"/>`;
+  const armR = o.reach ? `<path d="M10.5,-79 C17,-79.5 25,-81 33,-83.5 L33.4,-80.6 C25,-78 17,-76 9.6,-75Z"/>`
+                       : `<path d="M10.5,-79 C14,-71 15,-61 14.5,-51 L11.6,-50.5 C11.5,-60 10.8,-69 8.6,-76Z"/>`;
+  const handL = `<ellipse cx="-13" cy="-48.6" rx="1.7" ry="2.8"/>`;
+  const handR = o.reach ? `<ellipse cx="35" cy="-82.4" rx="2.8" ry="1.6"/>` : `<ellipse cx="13" cy="-48.6" rx="1.7" ry="2.8"/>`;
+  const legs = `<path d="M-8.4,-47 C-8.6,-31 -7.4,-16 -6.2,-2 L-2.8,-2 C-2.6,-16 -2,-31 -.8,-47Z"/><path d="M8.4,-47 C8.6,-31 7.4,-16 6.2,-2 L2.8,-2 C2.6,-16 2,-31 .8,-47Z"/>`;
+  const torso = `<path d="M-11,-80.5 C-12.2,-74 -9,-70 -8.2,-65 C-8,-60 -11,-55 -10.4,-47 L10.4,-47 C11,-55 8,-60 8.2,-65 C9,-70 12.2,-74 11,-80.5 C6,-82.8 -6,-82.8 -11,-80.5Z"/>`;
+  const neck = `<rect x="-2.3" y="-87.5" width="4.6" height="8"/>`;
+  const head = `<ellipse cx="0" cy="-93.5" rx="5.4" ry="7.1"/>`;
+  let cloth = '', hood = '';
+  if (o.dress) cloth += `<path d="M-11.4,-80.5 C-6,-83 6,-83 11.4,-80.5 C9,-72 8.5,-67 8.6,-64 C11,-56 13,-42 14,-30 L-14,-30 C-13,-42 -11,-56 -8.6,-64 C-8.5,-67 -9,-72 -11.4,-80.5Z" fill="${o.dress}"/>`;
+  if (o.blazer) cloth += `<path d="M-8.4,-47 C-8.6,-31 -7.4,-16 -6.2,-2 L-2.8,-2 C-2.6,-16 -2,-31 -.8,-47Z M8.4,-47 C8.6,-31 7.4,-16 6.2,-2 L2.8,-2 C2.6,-16 2,-31 .8,-47Z" fill="#17181b"/><path d="M-11.8,-81 C-6,-83.5 6,-83.5 11.8,-81 C12.5,-70 11.6,-58 11.4,-44 L-11.4,-44 C-11.6,-58 -12.5,-70 -11.8,-81Z" fill="${o.blazer}"/><path d="M0,-81 L-3,-66 L0,-56 L3,-66Z" fill="#c9c0b0" opacity=".5"/><g fill="${o.blazer}">${armL}${armR}</g>`;
+  if (o.coat){
+    hood = `<path d="M-7.6,-87 C-10.5,-101.5 10.5,-101.5 7.6,-87Z" fill="#9a7a18"/>`;
+    cloth += `<path d="M-12.8,-81.2 C-6,-84.4 6,-84.4 12.8,-81.2 C14.2,-70 15.2,-50 16.2,-27 L-16.2,-27 C-15.2,-50 -14.2,-70 -12.8,-81.2Z" fill="#c29a22"/><g fill="#b08b1d" stroke="#8a6c14" stroke-width=".3">${armL}${armR}</g><path d="M0,-82 L0,-27" stroke="#6e5712" stroke-width=".6"/><path d="M-14,-56 L-6,-56 M6,-56 L14,-56" stroke="#8a6c14" stroke-width=".5"/>`;
+  }
+  let det = '';
+  if ((o.face || 'front') === 'front') det = `<path d="M0,-96.4 L.9,-92.2 L0,-91.3" fill="none" stroke="rgba(0,0,0,.28)" stroke-width=".5"/><ellipse cx="-2.1" cy="-95" rx="1.5" ry=".8" fill="rgba(0,0,0,.13)"/><ellipse cx="2.1" cy="-95" rx="1.5" ry=".8" fill="rgba(0,0,0,.13)"/>`;
+  else det = `<path d="M0,-100.5 L0,-87" stroke="rgba(0,0,0,.25)" stroke-width=".5"/>`;
+  const seam = `<path d="M-2.4,-86 L2.4,-86 M-9,-47.5 L9,-47.5" stroke="rgba(0,0,0,.28)" stroke-width=".4"/>`;
+  const phone = o.phone ? `<circle cx="14" cy="-50" r="9" fill="url(#g-phone)"/><rect x="12.2" y="-53.4" width="3.6" height="6" rx=".7" fill="#cfeaff"/>` : '';
+  return `<g transform="translate(${f1(x)} ${f1(y)}) scale(${s.toFixed(3)})" opacity="${o.op ?? 1}"><ellipse cx="0" cy="0" rx="12" ry="2.2" fill="#000" opacity=".55"/><g fill="${skin}">${legs}${armL}${armR}${handL}${handR}${torso}${neck}</g>${cloth}${seam}<g transform="rotate(${o.tilt || 0} 0 -86)">${hood}<g fill="${skin}">${head}</g>${det}</g>${phone}</g>`;
+}
+
+function corridorBase(o = {}){
+  const vx = o.vx ?? 150, vy = o.vy ?? 178, L = o.L ?? -165, R = o.R ?? 165, Cc = -190, F = 165, Zf = o.Zf ?? 13, Zn = .6;
+  const p = (X, Y, Z) => [vx + X / Z, vy + Y / Z];
+  let s = `<rect width="300" height="400" fill="${o.bg || '#060808'}"/>`;
+  s += poly([p(L,Cc,Zn), p(R,Cc,Zn), p(R,Cc,Zf), p(L,Cc,Zf)], o.ceil || '#07090a');
+  s += poly([p(L,F,Zn), p(R,F,Zn), p(R,F,Zf), p(L,F,Zf)], o.floor || 'url(#g-floor)');
+  s += poly([p(L,Cc,Zn), p(L,Cc,Zf), p(L,F,Zf), p(L,F,Zn)], o.wallL || 'url(#g-wallL)');
+  s += poly([p(R,Cc,Zn), p(R,Cc,Zf), p(R,F,Zf), p(R,F,Zn)], o.wallR || 'url(#g-wallR)');
+  s += poly([p(L,Cc,Zf), p(R,Cc,Zf), p(R,F,Zf), p(L,F,Zf)], o.far || '#0c1312');
+  const fc = p(0, -10, Zf);
+  if (!o.noGlow) s += `<circle cx="${f1(fc[0])}" cy="${f1(fc[1])}" r="44" fill="url(#g-farglow)"/>`;
+  for (const z of [1, 1.4, 2, 2.8, 4, 5.5, 8]) if (z < Zf) s += ln(p(L,F,z), p(R,F,z), o.tile || '#0f1616', 1.1 / z);
+  for (const X of [-110, -55, 0, 55, 110]) if (X > L && X < R) s += ln(p(X,F,Zn), p(X,F,Zf), o.tile || '#0f1616', .5);
+  if (!o.noRefl) s += poly([p(-12,F,Zf), p(12,F,Zf), p(46,F,1.1), p(-46,F,1.1)], 'url(#g-refl)');
+  if (!o.noPanels) for (const z of [1.6, 2.4, 3.4, 4.8, 6.6, 9.5]) if (z < Zf) s += poly([p(-30,Cc,z), p(30,Cc,z), p(30,Cc,z * 1.18), p(-30,Cc,z * 1.18)], '#0c1012', 'stroke="#141a1c" stroke-width=".5"');
+  return { s, p, L, R, Cc, F, Zf };
+}
+function shop(b, side, z1, z2, o = {}){
+  const X = side === 'L' ? b.L : b.R, p = b.p; let s = '';
+  s += poly([p(X,-125,z1), p(X,-125,z2), p(X,b.F,z2), p(X,b.F,z1)], o.fill || '#050707');
+  if (o.gate !== false){
+    const n = Math.round((z2 - z1) * 9) + 4;
+    for (let i = 0; i <= n; i++){ const z = z1 + (z2 - z1) * i / n; s += ln(p(X,-125,z), p(X,b.F,z), '#172022', .9 / z); }
+    for (let y = -110; y < b.F; y += 22) s += ln(p(X,y,z1), p(X,y,z2), '#111a1c', .6 / z1);
+  }
+  s += poly([p(X,-160,z1), p(X,-160,z2), p(X,-132,z2), p(X,-132,z1)], o.sign || '#0f1416');
+  return s;
+}
+function exitSign(b, z = 5.5){
+  const a = b.p(-24,-186,z), c = b.p(24,-166,z), w = c[0] - a[0], h = c[1] - a[1], cx = (a[0] + c[0]) / 2, cy = (a[1] + c[1]) / 2;
+  return `<circle cx="${f1(cx)}" cy="${f1(cy)}" r="${f1(w * 1.7)}" fill="url(#g-exit)" opacity=".7"/><rect x="${f1(a[0])}" y="${f1(a[1])}" width="${f1(w)}" height="${f1(h)}" fill="#0c2a18"/><text x="${f1(cx)}" y="${f1(a[1] + h * .8)}" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="${f1(h * .8)}" fill="#6dffa8">EXIT</text>`;
+}
+function emerg(b, side, z){ const X = side === 'L' ? b.L + 2 : b.R - 2, q = b.p(X, -170, z); return `<circle cx="${f1(q[0])}" cy="${f1(q[1])}" r="${f1(30 / z)}" fill="url(#g-red)" opacity=".5"/><circle cx="${f1(q[0])}" cy="${f1(q[1])}" r="${f1(Math.max(.6, 3 / z))}" fill="#ff6a5c"/>`; }
+function westHall(b){ return shop(b,'L',1.1,1.9) + shop(b,'L',2.3,3.4) + shop(b,'L',4,5.6) + shop(b,'L',6.4,9) + shop(b,'R',.9,1.7) + shop(b,'R',3.8,5.4) + shop(b,'R',6.2,8.8) + emerg(b,'L',2.1) + emerg(b,'R',5.8); }
+function mallHand(){
+  return `<g transform="translate(250 418) rotate(-24)" filter="url(#f-blur)"><path d="M0,0 C-2,-16 -1,-34 2,-48 L17,-48 C19,-34 20,-16 19,0Z" fill="url(#g-skin)"/>`
+   + [[1,-70],[5.4,-74],[9.8,-73],[14,-68]].map(([x, y]) => `<rect x="${x}" y="${y}" width="3.8" height="${-y - 46}" rx="1.9" fill="url(#g-skin)"/>`).join('')
+   + `<path d="M17,-44 C24,-50 27,-56 28,-62 L24.5,-63 C23,-57 20,-52 15,-48Z" fill="url(#g-skin)"/><path d="M0,-10 L19,-10" stroke="rgba(0,0,0,.4)" stroke-width="1"/></g>`;
+}
+
+const SCENES = {
+  entry(){
+    const b = corridorBase({ wallL:'url(#g-concL)', wallR:'url(#g-concR)', floor:'url(#g-floorC)', far:'#0b0d0d', ceil:'#0a0a09', L:-120, R:120, Zf:9, tile:'#141412', noRefl:1, noPanels:1 });
+    let s = b.s;
+    const a = b.p(-34,-118,b.Zf), c = b.p(34,b.F,b.Zf);
+    s += `<rect x="${f1(a[0])}" y="${f1(a[1])}" width="${f1(c[0] - a[0])}" height="${f1(c[1] - a[1])}" fill="#0f1c1b"/><rect x="${f1(a[0] + 2)}" y="${f1(a[1] + 1)}" width="${f1((c[0] - a[0]) * .4)}" height="${f1(c[1] - a[1] - 1)}" fill="#1f3a36" opacity=".6"/>`;
+    s += `<circle cx="${f1((a[0] + c[0]) / 2)}" cy="${f1((a[1] + c[1]) / 2)}" r="34" fill="url(#g-farglow)"/>`;
+    s += ln(b.p(-100,-182,.7), b.p(-100,-182,b.Zf), '#1d1d1a', 4) + ln(b.p(-80,-186,.7), b.p(-80,-186,b.Zf), '#141412', 2.5) + ln(b.p(90,-180,.7), b.p(90,-180,b.Zf), '#181816', 3);
+    s += `<rect x="214" y="316" width="78" height="12" fill="#221e16"/><rect x="219" y="328" width="68" height="7" fill="#15130e"/><rect x="214" y="335" width="78" height="11" fill="#221e16"/><rect x="226" y="300" width="50" height="16" fill="#2a2a26"/>`;
+    const sg = b.p(-118,-60,2.2);
+    s += `<rect x="${f1(sg[0])}" y="${f1(sg[1])}" width="9" height="20" fill="#3a3528" opacity=".7"/>`;
+    s += `<ellipse cx="150" cy="275" rx="135" ry="120" fill="url(#g-beam)" opacity=".7"/>`;
+    return wrap(s);
+  },
+  corridor(o){
+    const b = corridorBase(); let s = b.s + westHall(b) + shop(b,'R',2.1,3.2) + exitSign(b);
+    const cfg = { 1:[8,11.5,{dim:1, face:'away'}], 2:[-8,4.4,{dim:1}], 3:[0,1.15,{reach:1, tilt:-8}] }[o.d || 1];
+    s += mq(...b.p(cfg[0], b.F, cfg[1]), 172 / cfg[1], cfg[2]);
+    return wrap(s, { flash: o.d === 3 });
+  },
+  arcade(){
+    const b = corridorBase(); let s = b.s + westHall(b);
+    s += shop(b,'R',2.0,3.4,{ gate:false, fill:'#04070a' });
+    for (const z of [2.25, 2.65, 3.05]){
+      const q = b.p(b.R, b.F, z), h = 100 / z, w = 26 / z;
+      s += `<rect x="${f1(q[0] - w)}" y="${f1(q[1] - h)}" width="${f1(w)}" height="${f1(h)}" fill="#0a0d13"/><rect x="${f1(q[0] - w * .85)}" y="${f1(q[1] - h * .82)}" width="${f1(w * .7)}" height="${f1(h * .25)}" fill="#203a6a" opacity=".55"/>`;
+    }
+    const a = b.p(-78,-188,3), c = b.p(78,-150,3), cx = (a[0] + c[0]) / 2;
+    s += `<rect x="${f1(a[0])}" y="${f1(a[1])}" width="${f1(c[0] - a[0])}" height="${f1(c[1] - a[1])}" fill="#0c090f" stroke="#3a1f33" stroke-width="1"/>`;
+    s += `<text x="${f1(cx)}" y="${f1(c[1] - 3.6)}" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="9" letter-spacing="1.5" fill="none" stroke="#d0569a" stroke-width=".6" opacity=".6">ORBIT ARCADE</text>`;
+    s += exitSign(b, 7);
+    s += mq(...b.p(-14, b.F, 3.6), 172 / 3.6, { dim:1, tilt:14 });
+    return wrap(s);
+  },
+  center(o){
+    const r = rng(77);
+    let s = `<rect width="300" height="400" fill="#06090b"/><rect x="0" y="40" width="300" height="95" fill="#0a0f12"/>`;
+    for (let x = 6; x < 300; x += 58){ s += `<rect x="${x}" y="50" width="46" height="8" fill="#0e1417"/><rect x="${x}" y="62" width="46" height="58" fill="#05080a"/>`; for (let i = 1; i < 9; i++) s += ln([x + i * 5.2, 62], [x + i * 5.2, 120], '#10171a', .7); }
+    s += poly([[50,0],[250,0],[226,36],[74,36]], '#15232c');
+    for (let i = 1; i < 6; i++) s += ln([50 + i * 33.3, 0], [74 + i * 25.3, 36], '#0b1318', 1);
+    s += `<rect x="0" y="126" width="300" height="16" fill="#121a1e"/>` + ln([0,126], [300,126], '#2a3a40', 1.2);
+    for (let x = 4; x < 300; x += 12) s += ln([x,112], [x,126], '#1c2629', .8);
+    s += ln([0,112], [300,112], '#24323a', 1);
+    s += `<rect x="0" y="142" width="300" height="122" fill="#080c0e"/><rect x="86" y="168" width="128" height="96" fill="#030505"/><rect x="80" y="150" width="140" height="16" fill="#0f0e0b"/><text x="150" y="162.5" text-anchor="middle" font-family="Georgia,serif" font-size="11" letter-spacing="5" fill="#6d6250" opacity=".8">HALLOWAY'S</text>`;
+    s += `<rect x="6" y="168" width="70" height="96" fill="#05080a"/><rect x="224" y="168" width="70" height="96" fill="#05080a"/>`;
+    s += poly([[96,36],[150,36],[232,400],[58,400]], 'url(#g-moon)', 'opacity=".55"') + poly([[170,36],[204,36],[292,400],[214,400]], 'url(#g-moon)', 'opacity=".3"');
+    s += `<rect x="0" y="264" width="300" height="136" fill="url(#g-floor)"/>`;
+    s += `<ellipse cx="150" cy="320" rx="114" ry="31" fill="#1b2326" stroke="#2c393d" stroke-width="2"/><ellipse cx="150" cy="318" rx="101" ry="23" fill="#050809"/>`;
+    for (let i = 0; i < 26; i++){ const a = r() * Math.PI * 2, d = Math.sqrt(r()); s += `<ellipse cx="${f1(150 + Math.cos(a) * 92 * d)}" cy="${f1(318 + Math.sin(a) * 19 * d)}" rx="1.1" ry=".6" fill="#9a8148" opacity="${(.3 + r() * .5).toFixed(2)}"/>`; }
+    s += `<rect x="142" y="264" width="16" height="52" fill="#1a2226"/><ellipse cx="150" cy="264" rx="34" ry="8" fill="#1d272b" stroke="#2c393d"/><ellipse cx="150" cy="263" rx="28" ry="5" fill="#070a0b"/>`;
+    s += poly([[230,352],[272,352],[300,196],[300,150],[280,150]], '#0e1417') + ln([228,334], [284,140], '#1f2a2e', 3.2) + ln([270,338], [300,188], '#1f2a2e', 3.2);
+    for (let i = 0; i < 12; i++){ const t = i / 12; s += ln([232 + 48 * t, 350 - 200 * t], [271 + 29 * t, 350 - 160 * t], '#141b1e', .8); }
+    s += `<rect x="12" y="300" width="58" height="38" fill="#11181a"/><rect x="10" y="296" width="62" height="6" fill="#182124"/>`;
+    for (let i = 0; i < 7; i++){ const x = 22 + i * 6; s += `<path d="M${x},298 C${x - 6 + r() * 12},${270 - r() * 30} ${x - 10 + r() * 20},${250 - r() * 30} ${x - 14 + r() * 28},${232 - r() * 30}" stroke="#0f1416" stroke-width="1.4" fill="none"/>`; }
+    if (o.m) s += mq(266, 230, 66, { dim:1 });
+    if (o.hand) s += mallHand();
+    return wrap(s);
+  },
+  window(o){
+    let s = `<rect width="300" height="400" fill="#07090a"/><rect x="0" y="0" width="300" height="108" fill="#0a0d0e"/>`;
+    s += `<rect x="14" y="56" width="272" height="42" fill="#100e0a"/><text x="150" y="84" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif" font-size="17" letter-spacing="4" fill="#8f7a4c" opacity=".85">KESSLER &amp; VINE</text>`;
+    s += `<rect x="18" y="104" width="264" height="240" fill="#0a0e0f" stroke="#262c2e" stroke-width="5"/><rect x="21" y="107" width="258" height="234" fill="url(#g-floor)" opacity=".55"/>`;
+    s += `<circle cx="78" cy="110" r="40" fill="url(#g-warm)" opacity="${o.bad ? .5 : .12}"/><circle cx="150" cy="110" r="40" fill="url(#g-warm)" opacity=".1"/><circle cx="222" cy="110" r="40" fill="url(#g-warm)" opacity=".1"/>`;
+    s += `<rect x="26" y="298" width="248" height="22" fill="#161b1c"/><rect x="26" y="298" width="248" height="2" fill="#262d2f"/>`;
+    const slots = [o.bad ? { coat:1 } : null, { dress:'#34474a', dim:1 }, { blazer:'#34343a', dim:1 }];
+    [78, 150, 222].forEach((x, i) => {
+      const c = slots[i];
+      if (!c) s += `<ellipse cx="${x}" cy="303" rx="15" ry="3" fill="#0c0f10" stroke="#2a3133"/><rect x="${x - 1.2}" y="262" width="2.4" height="41" fill="#2a3133"/>`;
+      else s += mq(x, 303, 150, { ...c, face: i === 2 ? 'away' : 'front', tilt: c.coat ? -10 : 0 });
+    });
+    s += poly([[44,104],[78,104],[20,262],[20,214]], '#fff', 'opacity=".035"') + poly([[190,104],[206,104],[150,344],[132,344]], '#fff', 'opacity=".025"');
+    s += `<rect x="0" y="344" width="300" height="56" fill="#0b0f10"/>` + ln([0,370], [300,370], '#121819', .8) + ln([0,392], [300,392], '#121819', .8);
+    s += `<circle cx="8" cy="36" r="64" fill="url(#g-farglow)"/>`;
+    return wrap(s, { flash: o.bad });
+  },
+  closeup(){
+    const r = rng(9);
+    let s = `<rect width="300" height="400" fill="#040505"/><rect width="300" height="400" fill="url(#g-floor)" opacity=".4"/>`;
+    s += `<path d="M-10,400 C10,330 80,308 150,306 C220,308 290,330 310,400Z" fill="url(#g-face)"/><path d="M120,226 L180,226 L184,316 L116,316Z" fill="url(#g-skin)"/><ellipse cx="150" cy="302" rx="37" ry="7" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1.4"/>`;
+    s += `<g filter="url(#f-soft)"><ellipse cx="150" cy="160" rx="66" ry="88" fill="url(#g-face)"/><ellipse cx="124" cy="152" rx="20" ry="12" fill="#3a332a" opacity=".09"/><ellipse cx="176" cy="152" rx="20" ry="12" fill="#3a332a" opacity=".09"/><ellipse cx="150" cy="127" rx="48" ry="10" fill="#fff" opacity=".12"/><path d="M150,140 C148,160 146,178 142,188 C148,192 154,192 158,188 C154,178 152,160 150,140Z" fill="#fff" opacity=".2"/><path d="M143,190 C147,193 153,193 157,190" stroke="#3a332a" stroke-opacity=".35" fill="none" stroke-width="1.5"/><path d="M134,212 C143,208 157,208 166,212 C157,216 143,216 134,212Z" fill="#3a332a" opacity=".07"/><path d="M186,186 l6,-3 l3,5 l-5,4z" fill="#6a5f50" opacity=".6"/><path d="M84,150 C86,120 100,96 120,84" stroke="rgba(0,0,0,.12)" stroke-width="2" fill="none"/></g>`;
+    for (let i = 0; i < 46; i++){ const big = r() < .18; s += `<circle cx="${f1(r() * 300)}" cy="${f1(r() * 400)}" r="${f1(big ? 3 + r() * 7 : .4 + r() * 1)}" fill="#fff" opacity="${(big ? .04 + r() * .05 : .15 + r() * .4).toFixed(2)}"/>`; }
+    return wrap(s, { flash:1 });
+  },
+  food(o){
+    let s = `<rect width="300" height="400" fill="#06080a"/><rect x="0" y="40" width="300" height="152" fill="#0a0d0f"/>`;
+    [['PRETZEL PALACE','#b0702d',6,94],['GOLDEN WOK','#a33d2e',104,92],['BURGER BARN','#a68e3a',200,94]].forEach(([n, c, x, w]) => {
+      s += `<rect x="${x}" y="60" width="${w}" height="22" fill="#0f1315"/><text x="${x + w / 2}" y="75.5" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="9.5" fill="${c}" opacity=".55" letter-spacing=".5">${n}</text><rect x="${x}" y="86" width="${w}" height="92" fill="#06090a"/>`;
+      for (let i = 1; i < 14; i++) s += ln([x + i * w / 14, 86], [x + i * w / 14, 160], '#0f1517', .6);
+      s += `<rect x="${x}" y="160" width="${w}" height="18" fill="#121819"/>`;
+    });
+    s += `<rect x="0" y="192" width="300" height="208" fill="url(#g-floor)"/>`;
+    for (let i = -7; i <= 7; i++) s += ln([150 + i * 14, 192], [150 + i * 78, 400], '#0e1517', .6);
+    for (const y of [204, 222, 248, 286, 340]) s += ln([0,y], [300,y], '#0e1517', .6);
+    const table = (x, y, k) => `<rect x="${f1(x - 26 * k)}" y="${f1(y - 30 * k)}" width="${f1(8 * k)}" height="${f1(24 * k)}" fill="#141a1c"/><rect x="${f1(x + 18 * k)}" y="${f1(y - 30 * k)}" width="${f1(8 * k)}" height="${f1(24 * k)}" fill="#141a1c"/>${ln([x, y - 14 * k], [x, y + 8 * k], '#11171a', 3 * k)}<ellipse cx="${f1(x)}" cy="${f1(y - 14 * k)}" rx="${f1(22 * k)}" ry="${f1(6 * k)}" fill="#1b2326" stroke="#263135" stroke-width=".6"/>`;
+    const rows = [[206,.35],[238,.55],[290,.82],[362,1.2]];
+    rows.forEach(([y, k], ri) => { const xs = ri % 2 ? [60,150,240] : [15,105,195,285]; xs.forEach(x => { if (!(o.m && ri === 2 && x === 150)) s += table(x, y, k); }); });
+    if (o.m){
+      s += `<clipPath id="cp-food"><rect x="0" y="0" width="300" height="279"/></clipPath><g clip-path="url(#cp-food)">${mq(150, 338, 112, { dim:1, tilt:-8 })}</g>`;
+      s += `<ellipse cx="150" cy="278" rx="18" ry="5" fill="#1b2326" stroke="#263135" stroke-width=".6"/>${ln([150,278], [150,296], '#11171a', 2.4)}`;
+      s += `<g transform="rotate(-18 186 318)"><rect x="178" y="296" width="9" height="24" fill="#182024"/><rect x="176" y="318" width="22" height="5" fill="#182024"/></g>`;
+    }
+    s += `<circle cx="18" cy="48" r="90" fill="url(#g-red)" opacity=".22"/>`;
+    return wrap(s);
+  },
+  halloways(){
+    let s = `<rect width="300" height="400" fill="#030404"/><rect x="0" y="222" width="300" height="178" fill="#070909"/>`;
+    for (const [y, x1, x2] of [[226,10,90],[230,200,290],[238,120,180]]){ s += ln([x1,y], [x2,y], '#121616', 1); for (let x = x1 + 4; x < x2; x += 7) s += `<rect x="${x}" y="${y}" width="5" height="${14 + (x % 5) * 3}" fill="#0b0e0e"/>`; }
+    [[30,252,72,{face:'away'}],[72,240,54,{}],[236,246,62,{face:'away'}],[278,268,92,{face:'away'}],[196,236,46,{face:'away'}],[108,232,42,{face:'away'}],[16,300,130,{face:'away', op:.25}]].forEach(([x, y, h, o]) => { s += mq(x, y, h, { dim:1, op:.33, ...o }); });
+    s += `<ellipse cx="150" cy="272" rx="142" ry="122" fill="url(#g-beam)"/>`;
+    s += mq(150, 348, 178, { op:.95, tilt:-6 });
+    s += `<rect x="108" y="58" width="84" height="18" fill="#0b0d0d"/><text x="150" y="71" text-anchor="middle" font-size="9" letter-spacing="3" fill="#3a3f3f" font-family="Georgia,serif">WOMEN'S</text>`;
+    return wrap(s, { grain:.7 });
+  },
+  stock(){
+    let s = `<rect width="300" height="400" fill="#050606"/><rect x="62" y="60" width="176" height="252" fill="#0f110f"/>`;
+    s += poly([[0,0],[62,60],[62,312],[0,400]], '#090a0a') + poly([[300,0],[238,60],[238,312],[300,400]], '#090a0a');
+    for (let k = 0; k < 6; k++){ const y = 66 + k * 48, yo = y + (y - 200) * .55; s += ln([62,y], [0,yo], '#1a1c1a', 2) + ln([238,y], [300,yo], '#1a1c1a', 2); for (let j = 0; j < 3; j++){ s += `<rect x="${8 + j * 17}" y="${f1(yo - 22 + j * 3)}" width="14" height="${18 - j * 2}" fill="#1b1914" opacity="${.9 - j * .2}"/><rect x="${278 - j * 17}" y="${f1(yo - 22 + j * 3)}" width="14" height="${18 - j * 2}" fill="#1b1914" opacity="${.9 - j * .2}"/>`; } }
+    s += `<rect x="196" y="140" width="38" height="172" fill="#020303"/><rect x="196" y="140" width="5" height="172" fill="#141614"/>`;
+    s += `<g transform="rotate(-3 140 180)"><rect x="94" y="108" width="92" height="122" fill="#cfc8b6"/><rect x="124" y="102" width="32" height="10" rx="2" fill="#6b6b6b"/><g font-family="'Courier New',Courier,monospace" font-size="6.3" fill="#2a2620"><text x="100" y="126" font-weight="700">HALLOWAY'S · NIGHT CLOSE</text><text x="100" y="144">1. Confirm PA playlist</text><text x="100" y="152">   runs until 12:30</text><text x="100" y="166">2. Lock audio rm (1988)</text><text x="100" y="180">3. Dress the floor</text><text x="100" y="212" opacity=".5">init: ___  ___  ___</text></g><path d="M100,184 C120,186 140,183 170,185" stroke="#7a2a22" stroke-width=".6" fill="none" opacity=".6"/></g>`;
+    s += `<ellipse cx="140" cy="176" rx="112" ry="96" fill="url(#g-beam)"/>`;
+    return wrap(s, { grain:.6 });
+  },
+  selfie(){
+    let s = `<rect width="300" height="400" fill="#1a120c"/>`;
+    for (let y = 0; y < 400; y += 9) s += `<rect x="0" y="${y}" width="300" height="5" fill="#2a1d14"/><rect x="0" y="${y + 5}" width="300" height="1.6" fill="#0a0604"/>`;
+    for (let y = 41; y < 120; y += 9) s += `<rect x="234" y="${y + 5}" width="11" height="1.6" fill="#d8cdbd" opacity=".55"/>`;
+    s += `<rect width="300" height="400" fill="url(#g-vig)"/><path d="M8,400 C30,322 90,302 150,300 C210,302 270,322 292,400Z" fill="#1d2125"/><rect x="128" y="250" width="44" height="60" fill="url(#g-human)"/><ellipse cx="150" cy="176" rx="74" ry="92" fill="#0c0806"/>`;
+    s += `<g filter="url(#f-soft)"><ellipse cx="150" cy="192" rx="56" ry="74" fill="url(#g-human)"/><path d="M92,172 C96,110 152,94 208,162 C190,130 160,122 140,128 C120,134 104,152 92,172Z" fill="#0c0806"/><ellipse cx="128" cy="186" rx="9" ry="5" fill="#1a110c"/><ellipse cx="172" cy="186" rx="9" ry="5" fill="#1a110c"/><circle cx="131" cy="185" r=".95" fill="#fff" opacity=".8"/><circle cx="175" cy="185" r=".95" fill="#fff" opacity=".8"/><path d="M116,174 C122,168 132,166 140,170 M184,174 C178,168 168,166 160,170" stroke="#0c0806" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M150,192 C148,206 146,213 143,217 C147,220 153,220 157,217" stroke="#5a4236" stroke-width="1.5" fill="none"/><path d="M137,238 C145,235 155,235 163,238" stroke="#4a3027" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M128,194 C127,207 129,217 128,228" stroke="#fff" stroke-opacity=".2" stroke-width="1.2" fill="none"/></g>`;
+    s += `<ellipse cx="150" cy="430" rx="210" ry="210" fill="url(#g-phone)" opacity=".3"/>`;
+    return wrap(s, { grain:.8 });
+  },
+  fitting(){
+    const b = corridorBase({ vy:150, wallL:'url(#g-warmL)', wallR:'url(#g-warmR)', floor:'url(#g-warmF)', far:'#2a231d', ceil:'#15110e', Zf:6, tile:'#241d17', noRefl:1, noGlow:1, noPanels:1 });
+    let s = b.s, p = b.p;
+    for (const side of ['L','R']) for (const z1 of [.75, 1.3, 2.1, 3.3]){
+      const X = side === 'L' ? b.L : b.R, z2 = z1 * 1.38;
+      s += poly([p(X,-130,z1), p(X,-130,z2), p(X,b.F - 14,z2), p(X,b.F - 14,z1)], '#3a2f25', 'stroke="#1a140f" stroke-width=".8"');
+      for (let y = -118; y < b.F - 20; y += 11) s += ln(p(X,y,z1), p(X,y,z2), '#1c1611', .9 / z1);
+      if (side === 'L' && z1 === 1.3) s += poly([p(X,b.F - 14,z1), p(X,b.F - 14,z2), p(X,b.F - 4,z2), p(X,b.F - 4,z1)], '#ffe6a8', 'opacity=".85"') + `<circle cx="${f1(p(X,b.F,1.55)[0])}" cy="${f1(p(X,b.F,1.55)[1])}" r="30" fill="url(#g-warm)"/>`;
+    }
+    const a = p(-46,-150,b.Zf), c = p(46,b.F - 6,b.Zf);
+    s += `<rect x="${f1(a[0])}" y="${f1(a[1])}" width="${f1(c[0] - a[0])}" height="${f1(c[1] - a[1])}" fill="#14191b" stroke="#4a3d30" stroke-width="2"/>`;
+    s += mq((a[0] + c[0]) / 2, c[1] - 2, (c[1] - a[1]) * .86, { op:.55, phone:1 });
+    return wrap(s, { flash:1 });
+  },
+  escal(){
+    let s = `<rect width="300" height="400" fill="#050708"/><rect x="0" y="150" width="300" height="112" fill="#0a0f11"/><ellipse cx="70" cy="236" rx="60" ry="9" fill="none" stroke="#1d2629" stroke-width="2"/>`;
+    s += poly([[30,400],[270,400],[182,190],[118,190]], '#0d1214');
+    for (let i = 0; i <= 18; i++){ const t = Math.pow(i / 18, 1.6), y = 190 + 210 * t, hw = 32 + 88 * t; s += ln([150 - hw, y], [150 + hw, y], '#1a2326', .5 + 1.6 * t); }
+    s += `<path d="M6,400 L108,186" stroke="#141b1e" stroke-width="16"/><path d="M294,400 L192,186" stroke="#141b1e" stroke-width="16"/>` + ln([14,400], [112,186], '#26323a', 1) + ln([286,400], [188,186], '#26323a', 1);
+    s += mq(150, 214, 64, { dim:1, phone:1 });
+    s += `<ellipse cx="160" cy="216" rx="18" ry="4" fill="url(#g-phone)" opacity=".4"/>`;
+    return wrap(s);
+  },
+  audio(){
+    let s = `<rect width="300" height="400" fill="#060707"/><rect x="46" y="40" width="208" height="320" fill="#111315" stroke="#1d2124"/>`;
+    for (let i = 0; i < 7; i++){ const y = 64 + i * 42; s += `<rect x="58" y="${y}" width="184" height="34" fill="#16191b" stroke="#222629"/>`; if (i !== 2) for (let k = 0; k < 5; k++) s += `<circle cx="${76 + k * 14}" cy="${y + 17}" r="4" fill="#0c0e0f" stroke="#2b3034"/>`; if (i !== 2) s += `<rect x="160" y="${y + 13}" width="70" height="8" fill="#0b0d0e"/>`; }
+    s += `<rect x="68" y="152" width="164" height="26" fill="#030805"/><text x="150" y="169.5" text-anchor="middle" font-family="'Courier New',monospace" font-size="10.5" font-weight="700" fill="#59ff7a">PL4 NIGHT  T01  41:12</text><text x="150" y="169.5" text-anchor="middle" font-family="'Courier New',monospace" font-size="10.5" font-weight="700" fill="#59ff7a" filter="url(#f-glow)" opacity=".7">PL4 NIGHT  T01  41:12</text>`;
+    s += `<circle cx="236" cy="165" r="2" fill="#59ff7a"/><circle cx="236" cy="165" r="6" fill="#59ff7a" opacity=".25" filter="url(#f-glow)"/>`;
+    s += `<g transform="rotate(-1.2 150 48)"><rect x="70" y="44" width="160" height="11" fill="#d9d2b0"/><text x="150" y="51.8" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.6" font-weight="700" fill="#3a3320">IN-STORE AUDIO — DO NOT TURN OFF</text></g>`;
+    s += `<ellipse cx="150" cy="170" rx="130" ry="110" fill="url(#g-beam)"/>`;
+    return wrap(s, { flash:1 });
+  },
+  lot(){
+    let s = `<rect width="300" height="400" fill="url(#g-sky)"/><path d="M0,214 C40,204 60,211 90,205 C130,199 170,209 210,203 C250,197 280,207 300,203 L300,230 L0,230Z" fill="#05070a"/><rect x="0" y="228" width="300" height="172" fill="#0b0c0e"/>`;
+    for (let i = -5; i <= 5; i++) s += ln([150 + i * 11, 232], [150 + i * 62, 400], '#2a2a26', .8, 'opacity=".45"');
+    for (const [x, top] of [[58,118],[232,138],[150,172]]) s += ln([x, top], [x, 232], '#14161a', 2) + `<ellipse cx="${x}" cy="${top + 128}" rx="56" ry="10" fill="url(#g-lamp)" opacity=".35"/><circle cx="${x}" cy="${top}" r="32" fill="url(#g-lamp)"/><circle cx="${x}" cy="${top}" r="2" fill="#ffd9a0"/>`;
+    s += `<rect x="168" y="244" width="28" height="9" rx="2" fill="#0f1013"/><circle cx="171.5" cy="249" r="6" fill="url(#g-red)"/><circle cx="192.5" cy="249" r="6" fill="url(#g-red)"/><circle cx="171.5" cy="249" r="1.4" fill="#ff4b40"/><circle cx="192.5" cy="249" r="1.4" fill="#ff4b40"/>`;
+    s += `<g opacity=".07">${mq(64, 470, 330, {})}</g>`;
+    s += `<rect x="0" y="0" width="300" height="14" fill="#020203"/><rect x="0" y="386" width="300" height="14" fill="#020203"/><rect x="0" y="0" width="16" height="400" fill="#020203"/><rect x="284" y="0" width="16" height="400" fill="#020203"/><rect x="142" y="0" width="16" height="400" fill="#020203"/><rect x="30" y="236" width="100" height="6" rx="3" fill="#16181b"/><rect x="170" y="236" width="100" height="6" rx="3" fill="#16181b"/>`;
+    return wrap(s);
+  },
+  exterior(){
+    const r = rng(3);
+    let s = `<rect width="300" height="400" fill="url(#g-sky)"/><rect x="-10" y="150" width="320" height="112" fill="#121417"/><rect x="-10" y="146" width="320" height="8" fill="#1a1d21"/>`;
+    const word = 'FAIRHAVEN GALLERIA', dead = [4, 10, 14];
+    [...word].forEach((ch, i) => { if (ch === ' ') return; const x = 36 + i * 13.4, on = !dead.includes(i); s += `<text x="${f1(x)}" y="176" text-anchor="middle" font-family="Georgia,serif" font-size="15" fill="${on ? '#d4483e' : '#2a1716'}" opacity="${on ? .8 : 1}">${ch}</text>`; if (on) s += `<text x="${f1(x)}" y="176" text-anchor="middle" font-family="Georgia,serif" font-size="15" fill="#ff5a4e" filter="url(#f-glow)" opacity=".5">${ch}</text>`; });
+    s += `<rect x="116" y="194" width="68" height="68" fill="#1d1a13"/><circle cx="150" cy="226" r="40" fill="url(#g-warm)" opacity=".5"/>` + ln([150,194], [150,262], '#0a0a0a', 2) + ln([116,194], [184,194], '#0a0a0a', 3);
+    s += mq(162, 260, 50, { op:.85 });
+    s += `<rect x="0" y="262" width="300" height="138" fill="#0a0b0c"/>`;
+    for (const x of [30, 270]) s += ln([x,120], [x,262], '#14161a', 2) + `<circle cx="${x}" cy="120" r="30" fill="url(#g-lamp)"/><ellipse cx="${x}" cy="272" rx="50" ry="8" fill="url(#g-lamp)" opacity=".3"/>`;
+    s += `<path d="M-10,400 L-10,346 C80,330 220,330 310,346 L310,400Z" fill="#030304"/>`;
+    for (let i = 0; i < 34; i++){ const rr = .8 + r() * 3; s += `<circle cx="${f1(r() * 300)}" cy="${f1(r() * 330)}" r="${f1(rr)}" fill="#fff" fill-opacity=".05" stroke="#fff" stroke-opacity=".1" stroke-width=".4"/>`; }
+    return wrap(s);
+  }
+};
+const SCENE_META = { entry:'IMG_4471', corridor:'IMG_4480', arcade:'IMG_0001', center:'IMG_4473', window:'IMG_4476', closeup:'IMG_4483', food:'IMG_4477', halloways:'IMG_4491', stock:'IMG_4492', selfie:'IMG_0094', fitting:'IMG_4499', escal:'IMG_0097', audio:'IMG_0096', lot:'IMG_4501', exterior:'IMG_0099' };
+
+/* ============================================================
+   MAP — fairhaven_directory_2009.jpg
+   ============================================================ */
+const POS = { dock:[28,125], westcorr:[100,125], arcade:[65,100], kv:[124,100], center:[170,125], food:[248,96], halloways:[170,198], stock:[199,238], fitting:[142,238], l2:[308,221], east:[329,125], front:[170,56] };
+function mapSVG(){
+  const st = (x, y, w, h, label, o = {}) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${o.fill || '#171d20'}" stroke="${o.stroke || '#2b3337'}" stroke-width=".8"/><text x="${x + w / 2}" y="${y + h / 2 + 2.6}" font-size="${o.fs || 7}" text-anchor="middle" fill="${o.tc || '#9aa4a8'}" font-family="Arial,sans-serif">${label}</text>`;
+  let s = `<svg viewBox="0 0 340 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fairhaven Galleria store directory"><rect width="340" height="270" fill="#0b0e10"/>`;
+  s += `<text x="12" y="20" font-size="8.5" font-family="Georgia,serif" fill="#c9b98a" letter-spacing="1.5">FAIRHAVEN GALLERIA</text><text x="12" y="31" font-size="6" font-family="Arial,sans-serif" fill="#6b7478" letter-spacing="1">STORE DIRECTORY · LEVEL 1 · EST. 1988</text>`;
+  s += `<rect x="18" y="108" width="304" height="34" fill="#141a1d"/><text x="60" y="128" font-size="6" fill="#4d585d" font-family="Arial">WEST WING</text><text x="250" y="128" font-size="6" fill="#4d585d" font-family="Arial">EAST WING</text>`;
+  s += st(36,58,58,44,'Orbit Arcade') + st(98,58,52,44,'Kessler &amp; Vine') + st(36,148,58,40,'Cinema 6') + st(98,148,20,40,'') + `<text x="108" y="170" font-size="5" text-anchor="middle" fill="#6b7478" font-family="Arial" transform="rotate(-90 108 168)">Pinewood</text>`;
+  s += st(148,40,44,28,'Main Entrance',{fs:6}) + `<path d="M150,64 L190,44 M150,44 L190,64" stroke="#7a3a33" stroke-width=".8" opacity=".8"/><text x="170" y="38" font-size="5.5" text-anchor="middle" fill="#a0544a" font-family="Arial">chained</text>`;
+  s += `<circle cx="170" cy="125" r="31" fill="#182024" stroke="#2b3337"/><circle cx="170" cy="125" r="9" fill="none" stroke="#3a5560"/><text x="170" y="150" font-size="6" text-anchor="middle" fill="#9aa4a8" font-family="Arial">Center Court</text>`;
+  s += st(206,52,86,46,'Food Court') + st(226,148,44,36,'Card &amp; Gift',{fs:6}) + st(274,148,44,36,'Galaxy Shoes',{fs:6});
+  s += st(122,162,96,94,'',{fill:'#141a1c'}) + `<text x="170" y="186" font-size="8" text-anchor="middle" fill="#b5a984" font-family="Georgia,serif" letter-spacing="1.5">HALLOWAY'S</text>` + st(126,228,34,22,'Fitting Rms',{fs:5.5}) + st(182,228,32,22,'Stockroom',{fs:5.5});
+  s += st(2,100,15,50,'',{fill:'#10161a'}) + `<text x="10" y="126" font-size="5.5" text-anchor="middle" fill="#9aa4a8" font-family="Arial" transform="rotate(-90 10 125)">Loading Dock</text>`;
+  s += st(323,108,15,34,'',{fill:'#2a1414',stroke:'#5a2a2a'}) + `<text x="330" y="126" font-size="5.5" text-anchor="middle" fill="#d08a80" font-family="Arial" transform="rotate(90 330 125)">Exit · alarm</text>`;
+  s += `<rect x="240" y="196" width="94" height="64" rx="3" fill="#0f1416" stroke="#2b3337" stroke-dasharray="2 2"/><text x="246" y="206" font-size="5.5" fill="#6b7478" font-family="Arial" letter-spacing="1">LEVEL 2 (via escalator)</text>` + st(246,212,40,20,'Management',{fs:5.5}) + st(290,212,38,20,'Audio Rm',{fs:6,stroke:'#6a5a2a',tc:'#c9b98a'});
+  S.sightings.forEach((g, i) => { const q = POS[g.loc]; if (!q) return; const x = q[0] - 14 + i * 8, y = q[1] - 6 + (i % 2) * 8; s += `<path d="M${x - 3},${y - 3} L${x + 3},${y + 3} M${x - 3},${y + 3} L${x + 3},${y - 3}" stroke="#e9e1d3" stroke-width="1.5"/><text x="${x}" y="${y - 5}" font-size="4.6" text-anchor="middle" fill="#bdb5a6" font-family="Arial">${g.t}</text>`; });
+  const mp = POS[S.pos];
+  if (mp) s += `<circle cx="${mp[0]}" cy="${mp[1]}" r="7" fill="#f1c94a" opacity=".25"><animate attributeName="r" values="4;10;4" dur="2s" repeatCount="indefinite"/></circle><circle cx="${mp[0]}" cy="${mp[1]}" r="3.4" fill="#f1c94a" stroke="#0b0e10" stroke-width="1"/><text x="${mp[0]}" y="${mp[1] + 11}" font-size="6" text-anchor="middle" fill="#f1c94a" font-family="Arial" font-weight="700">${S.imp && S.half === 1 ? 'Mira?' : 'Mira'}</text>`;
+  return s + `</svg>`;
+}
+
+/* ============================================================
+   STORY
+   ============================================================ */
+const img = (scene, o) => ({ k:'img', scene, o });
+const voice = (sound, dur) => ({ k:'voice', sound, dur });
+const sys = text => ({ k:'sys', text });
+const wait = ms => ({ k:'wait', ms });
+const fake = ms => ({ k:'fake', ms });
+const fx = fn => ({ k:'fx', fn });
+const clock = v => ({ k:'clock', v });
+const pos = v => ({ k:'pos', v });
+const sight = v => ({ k:'sight', v });
+const music = (v, gap) => ({ k:'music', v, gap });
+const sfx = v => ({ k:'sfx', v });
+const status = (th, v) => ({ k:'status', th, v });
+const to = (th, x) => typeof x === 'string' ? { k:'m', text:x, th } : { ...x, th };
+const codeChoices = s => ['1988','2011','1230','0419'].filter(c => !s.tried.includes(c)).map(c => ({ t:c, go: c === '1988' ? 'audio_ok' : 'audio_wrong', fx: st => st.tried.push(c) }));
+
+const STORY = {
+  start: { th:'mira', seq:[ clock('11:47'), pos('dock'),
+    "ok im in", "the loading dock door was literally just. open", img('entry'), "wait", "do you hear that", "no obviously u cant hear it", "theres MUSIC playing" ],
+    ch:[ { t:"music??", go:'music1' }, { t:"mira that place closed in 2011", go:'music1', set:{ teased:1 } }, { t:"nope. that's already too creepy. leave", go:'music1', set:{ worried:1 } } ] },
+
+  music1: { th:'mira', seq:[ clock('11:49'),
+    "like mall music. elevator jazz", "its coming out of the ceiling speakers", "every light is off except the emergency ones but somebody is still paying for the PA lmao",
+    s => s.worried ? "im not leaving. i drove 40 min and i wore the yellow raincoat for the thumbnail" : "wore the yellow raincoat so im visible in the footage. thumbnail secured",
+    s => s.teased && "and yes i know its been closed since 2011 thats the POINT",
+    voice('muzak','0:07'), "listen", "its so pretty?? its so wrong",
+    "ok im calling u and leaving it on. im muted on my end. i cant talk out loud in here",
+    fx(() => callStart('mira','A')), "can u hear it" ],
+    ch:[ { t:"i hear it. it echoes so much", go:'music2' }, { t:"that's the saddest song i've ever heard", go:'music2' }, { t:"why is it still on", go:'music2', set:{ q:1 } } ] },
+
+  music2: { th:'mira', seq:[
+    s => s.q ? ["nobody knows. there are like 4 reddit threads about it", "the mall closed and the music just. never got turned off"] : "right??",
+    "ok i sent u the directory from the archive site", fx(() => { S.mapUnlocked = true; refreshChrome(); $('#mapBtn').classList.add('pulse'); }), sys("Mira shared a file · fairhaven_directory_2009.jpg"),
+    "tap the map up top if u need it", "where first. i want footage before my battery dies. 31%" ],
+    ch:[ { t:"Center court. The fountain.", go:'cc1' }, { t:"Kessler & Vine. The clothing store.", go:'kv1' }, { t:"The food court.", go:'fc1' } ] },
+
+  cc1: { th:'mira', seq:[ pos('center'), clock('11:53'), "center court it is", "omg the fountain", img('center'), "its dry. theres still coins in it", "the music is louder here. its echoing off everything", "ok its kind of beautiful. dont tell anyone i said that" ], go:'corr' },
+  kv1: { th:'mira', seq:[ pos('kv'), clock('11:53'), "fashion era", "the gate is down but the window display is still up", img('window'), "theyre still dressed. 2009 was a crime", "one of the stands is empty tho", "like someone took one", fx(s => s.sawEmpty = 1) ], go:'corr' },
+  fc1: { th:'mira', seq:[ pos('food'), clock('11:53'), "the chairs are all still out", img('food'), "it smells like dust and. pretzels?? how", "15 years and it still smells like pretzels" ], go:'corr' },
+
+  corr: { th:'mira', seq:[ pos('westcorr'), clock('11:58'), "ok heading down the west wing toward the arcade", img('corridor',{ d:1 }), "this one came out so creepy lol" ],
+    ch:[ { t:"mira. zoom in. end of the hallway.", go:'corr_see' }, { t:"very aesthetic", go:'corr_miss' }, { t:"is someone standing there??", go:'corr_see' } ] },
+  corr_see: { th:'mira', seq:[ "???", "oh", "its a mannequin lol", "someone dragged one out into the hall", "probably other explorers being funny" ], go:'corr2' },
+  corr_miss: { th:'mira', seq:[ "thank u i have an eye", "wait", "theres something at the end of the hall", "oh. its a mannequin. jesus", "someone dragged one out into the middle of the hall" ], go:'corr2' },
+  corr2: { th:'mira', seq:[ s => s.sawEmpty && "probably the one from the kessler window. the empty stand", "its just standing there in the middle", "im getting a close up. this is CONTENT" ],
+    ch:[ { t:"Don't.", go:'close', set:{ warned:1 } }, { t:"Get the face.", go:'close' }, { t:"Put it back where it belongs", go:'close', set:{ helpful:1 } } ] },
+
+  close: { th:'mira', seq:[ s => s.warned && "too late im already walking", clock('12:01'), "ok im right next to it", img('closeup'), sfx('sting'),
+    "no face obviously", "but its so clean?? everything in here has an inch of dust on it and it doesnt",
+    s => s.helpful && "and im not carrying it anywhere. absolutely not",
+    "ok creepy. moving on. its plastic", sight('westcorr'), "walking to the arcade", wait(1400),
+    music('B', 2900), wait(4200), "hold on", "the song just ended", "like full silence for a couple seconds and then a new song",
+    "and i swear when it went quiet i heard something behind me", "like one step" ],
+    ch:[ { t:"Look back.", go:'look' }, { t:"Don't look. Keep walking.", go:'nolook' }, { t:"Unmute. Let me hear.", go:'mic' } ] },
+  mic: { th:'mira', seq:[ "NO. if somethings there i dont want it to hear me", "ok. ok im looking" ], go:'look' },
+  nolook: { th:'mira', seq:[ "ok", "walking", "...", "i have to look. i cant not look" ], go:'look' },
+
+  look: { th:'mira', seq:[ clock('12:04'), "ok", "its closer", img('corridor',{ d:2 }), "its like 30 feet closer than where i left it", "i walked AWAY from it. it was facing the gate", "now its facing me", sight('westcorr') ],
+    ch:[ { t:"Someone else is in there with you.", go:'someone' }, { t:"Get out. Now.", go:'getout' }, { t:"Don't take your eyes off it.", go:'watch' } ] },
+  someone: { th:'mira', seq:[ "dont SAY that", "i didnt hear anyone. no footsteps. just the one step when the music cut" ], go:'rule' },
+  getout: { th:'mira', seq:[ "the loading dock is behind it", "id have to walk right past it", "theres an emergency exit on the east side but its alarmed. if the alarm even works" ], go:'rule' },
+  watch: { th:'mira', seq:[ "im watching it", "its not moving", "obviously its not moving. its a mannequin", "..." ], go:'rule' },
+
+  rule: { th:'mira', seq:[ "ok. thinking about it logically", "nothing happened until the song changed", "the gap. the silence between songs" ],
+    ch:[ { t:"So the music keeps it still?", go:'rule2' }, { t:"That makes no sense.", go:'rule_n' }, { t:"Then stay where the music is loudest.", go:'rule2' } ] },
+  rule_n: { th:'mira', seq:[ "NONE of this makes sense. im just telling u what happened" ], go:'rule2' },
+  rule2: { th:'mira', seq:[ clock('12:07'), "idk. i want to test it", "next song change im watching it through my camera. not blinking. not looking away",
+    wait(2400), "this song is ending i can tell", music('C', 3800), wait(1600), "its quiet", wait(2600), "i didnt blink", "I DIDNT BLINK",
+    img('corridor',{ d:3 }), sfx('sting'), "it moved while i was looking at it", "its not about looking. its the silence", "every time the music stops it gets to move",
+    fx(s => s.knowsRule = 1), sight('westcorr') ],
+    ch:[ { t:"Run for the loading dock.", go:'r_dock' }, { t:"Hide somewhere until morning.", go:'r_hide' }, { t:"Find where the music's coming from.", go:'r_pa' } ] },
+  r_dock: { th:'mira', seq:[ "its between me and the dock. its RIGHT there", "halloways connects to the service corridor through their stockroom. long way around to the dock", "going" ], go:'halloways' },
+  r_hide: { th:'mira', seq:[ "halloways. the department store. its huge and theres a stockroom with a door", "going" ], go:'halloways' },
+  r_pa: { th:'mira', seq:[ pos('l2'), clock('12:10'), "management office. upstairs. ur map says audio rm", "the escalator doesnt work obviously. walking up it",
+    "ok theres a door. AUDIO RM. keypad lock", "theres a sign taped to it", "\"in-store audio: playlist 4 (night) ends 12:30 AM\"", "its 12:10",
+    "so at 12:30 the music stops", "and doesnt come back on", "i do not want to be in here at 12:30", fx(s => s.knowsDeadline = 1), wait(1600),
+    "it was at the bottom of the escalator. i looked down", "its not anymore", "halloways has an upstairs entrance from here. going" ], go:'halloways' },
+
+  halloways: { th:'mira', seq:[ pos('halloways'), clock('12:14'), "in halloways. its pitch black. flashlight on", "theres so many mannequins in here", "like 50. every department",
+    img('halloways'), "none of them are moving. i checked", "i checked twice", "ok stockroom. door's open", pos('stock'), img('stock'),
+    "theres a closing checklist on the wall lol", "\"1. confirm PA playlist runs until 12:30. 2. lock audio rm (1988). 3. dress the floor\"", "dress the floor??", "battery's at 6%" ],
+    ch:[ { t:"Save your battery. Only text if you need to.", go:'dies' }, { t:"What does 'dress the floor' mean?", go:'dies_q' },
+         { t:"It's 12:15. You have fifteen minutes of music left.", go:'dies_t', if: s => s.knowsDeadline }, { t:"What happens at 12:30?", go:'dies_t2', if: s => !s.knowsDeadline } ] },
+  dies_q: { th:'mira', seq:[ "i think its like. setting the mannequins out for the morning", "putting them where they go", "oh", "oh i dont like that" ], go:'dies' },
+  dies_t: { th:'mira', seq:[ "i know. i know", "the service corridor is like 5 min" ], go:'dies' },
+  dies_t2: { th:'mira', seq:[ "the music stops i guess", "the playlist ends", "oh", "oh no" ], go:'dies' },
+  dies: { th:'mira', seq:[ clock('12:18'), "ok", wait(1800), "theres something in here", "i can hear it", sfx('clicks'), "tk. tk. tk", "like plastic feet on tile", "im going behind the shelves",
+    fake(2600), wait(900), fake(1600), wait(700), "its in the doorway", "i", wait(1700), fx(() => callEnd()), status('mira','last seen 12:19'), wait(1500) ],
+    ch:[ { t:"mira??", go:'imp0' }, { t:"MIRA", go:'imp0' }, { t:"answer me. please.", go:'imp0' } ] },
+
+  imp0: { th:'mira', seq:[ wait(5000), fx(() => { S.threads.mira.status = 'online'; refreshChrome(); }), fake(2600), wait(3800), clock('12:23'), fx(s => s.imp = true),
+    "Sorry. My phone died. I found a charger in the stockroom.", "I am okay. It was nothing. Just the building settling." ],
+    ch:[ { t:"what HAPPENED in there", go:'imp1' }, { t:"why are you typing like that", go:'imp_caps' }, { t:"thank god. get out of there", go:'imp1' } ] },
+  imp_caps: { th:'mira', seq:[ fx(s => s.noticedCaps = 1), "Like what?", "My phone restarted when it died. Autocorrect must have turned itself back on.", "it’s fine." ], go:'imp1' },
+  imp1: { th:'mira', seq:[ "The mannequin is gone. I think someone was messing with me. Another explorer.", "I am going to walk out the front.", pos('center'), img('center',{ hand:1 }),
+    "Isn’t it beautiful? Everyone left. The music never did." ],
+    ch:[ { t:"you're scaring me", go:'imp2' }, { t:"just leave. please.", go:'imp2' }, { t:"wait. what's my name?", go:'imp_name' } ] },
+  imp_name: { th:'mira', seq:[ fx(s => s.suspicious = 1), "You’re my best friend.", "You’re the one who stayed up with me.", "That is what matters." ], go:'imp2' },
+  imp2: { th:'mira', seq:[ clock('12:28'), pos('front'), "I’m at the front doors. They were open after all.", wait(1500), "I’m out.", wait(1200), "I’m in the car.",
+    "That was insane. Thank you for staying with me tonight.", "One more thing.", "Listen.", fx(() => callStart('mira','closing',{ chime:true })), wait(4600), "They play this one at closing." ],
+    ch:[ { t:"mira why can i hear the mall", go:'imp3a' }, { t:"goodnight mira", go:'imp3b' }, { t:"text me when you get home", go:'imp3c' } ] },
+  imp3a: { th:'mira', seq:[ "The windows are down. It carries." ], go:'imp_end' },
+  imp3b: { th:'mira', seq:[ "Goodnight." ], go:'imp_end' },
+  imp3c: { th:'mira', seq:[ "I am home." ], go:'imp_end' },
+  imp_end: { th:'mira', seq:[ clock('12:30'), wait(3500), { k:'credits' } ], go:'u_start' },
+
+  /* ---------------- after the credits ---------------- */
+  u_start: { th:'unk', seq:[ clock('12:31'), pos('fitting'),
+    "hello??", "its mira", "please be awake", "i dropped my phone in the halloways stockroom", "ive been hiding in a fitting room for like 15 min",
+    "this phone was in a drawer at the cell phone kiosk. it had 9% somehow", "i took off my raincoat its too bright. i left it back there",
+    "the music stopped", "it just stopped and its not coming back on" ],
+    ch:[ { t:"Mira just texted me. She said she's home.", go:'u_car' }, { t:"Prove it's you.", go:'u_prove' }, { t:"who is this", go:'u_prove' } ] },
+  u_car: { th:'unk', seq:[ "what", "no", "no no no im in a fitting room. i can see my own shoes", "whoever has my phone is NOT me" ], go:'u_inter' },
+  u_prove: { th:'unk', seq:[ "i dont know how", "the thing with my phone read everything i sent u", "i type like this. i always type like this. u know that", "did it type like me??" ], go:'u_inter' },
+  u_inter: { th:'unk', seq:[ wait(1200), to('mira',"Don’t answer that number."), to('mira',"I’m home. I told you I’m home."), wait(800), "did it just text u", "it did didnt it" ],
+    ch:[ { t:"I believe you. What do I do?", go:'plan' }, { t:"Send me a picture. Right now.", go:'selfie' }, { t:"Stop texting me. Mira is home.", go:'abandon' } ] },
+  selfie: { th:'unk', seq:[ img('selfie'), "happy??", "ive been crying so dont say anything" ], go:'plan' },
+  abandon: { th:'unk', seq:[ wait(2600), "ok", wait(3600), "ok.", wait(3400), fake(2400), wait(1200), "please" ],
+    ch:[ { t:"wait. mira. i'm sorry. i'm here.", go:'plan', add:{ strikes:1 } }, { t:"Goodbye.", go:'end_window' } ] },
+  end_window: { th:'unk', seq:[ wait(5000), to('mira',"Good."), to('mira',"Go to sleep."), wait(4500), clock('6:02'), to('mira', img('window',{ bad:1 })), to('mira',"New arrivals.") ], end:'window' },
+
+  plan: { th:'unk', seq:[ "ok what do i do. u have the map. i cant see anything", "theres no music. it can move whenever it wants",
+    wait(2200), to('mira', img('fitting')), to('mira',"Found you."), sfx('sting'), wait(1800), "wait", "i hear it", "tk. tk.", "its outside the fitting rooms" ],
+    ch:[ { t:"Don't move. Don't make a sound.", go:'hide' }, { t:"Run. Now.", go:'run' }, { t:"Turn your screen all the way down.", go:'hide' } ] },
+  hide: { th:'unk', seq:[ "ok", fake(2200), wait(2600), "a door just opened. not mine", fake(1800), "its checking them one by one", wait(3000), "mine is next",
+    wait(4400), "it stopped", wait(2600), "its walking away", "tk tk tk getting quieter", "oh my god" ], go:'locate' },
+  run: { th:'unk', seq:[ "RUNNING", wait(1600), "its behind me i can hear it its FAST", wait(1600), pos('center'), "out of halloways. center court", "i dont hear it anymore", "i dont know where it went", fx(s => s.strikes++) ], go:'locate' },
+
+  locate: { th:'unk', seq:[ fx(s => { if (!s.mLoc) s.mLoc = Math.random() < .5 ? 'east' : 'west'; }), wait(1500), clock('12:41'),
+    s => s.mLoc === 'east' ? [to('mira', img('food',{ m:1 })), to('mira',"Come sit with me. Tell her there’s a seat.")] : [to('mira', img('arcade')), to('mira',"I’m waiting by the games. Tell her to come play.")],
+    wait(1500), "ok i have to move", "it keeps texting u right?? does it send pictures?", "can u tell where it is", "where do i go" ],
+    ch:[ { t:"Loading dock. West wing, past the arcade.", go: s => s.mLoc === 'west' ? 'caught_west' : 'west' },
+         { t:"Emergency exit. East, through the food court.", go: s => s.mLoc === 'east' ? 'caught_east' : 'east' },
+         { t:"Upstairs. The audio room. Turn the music back on.", go:'audio' } ] },
+
+  west: { th:'unk', seq:[ pos('westcorr'), "going west", "running past kessler and vine", "wait", "theres a new one in the window. on the empty stand", "its wearing a yellow raincoat",
+    "thats MY raincoat", "i left it in the stockroom 20 min ago", "ok. ok. dock", pos('dock'), "the door i came in", "its closed", "i left it open. i KNOW i left it open" ],
+    ch:[ { t:"Hit the push bar. Hard.", go:'dock_out' }, { t:"Go back. Try the audio room.", go:'audio', add:{ strikes:1 } } ] },
+  dock_out: { th:'unk', seq:[ "its stuck", wait(1800), "its moving", "IM OUT", "im outside", "running to my car", wait(2500), clock('12:52'), "in the car. doors locked", "im actually in the car",
+    wait(2600), to('mira', img('window',{ bad:1 })), to('mira',"You left before closing."), to('mira',"You forgot your coat.") ], end:'dock' },
+  caught_west: { th:'unk', seq:[ pos('westcorr'), "going west", "past the arcade", "oh", "its here", "its in front of the arcade", "its right in front of me" ], go:'caught' },
+
+  east: { th:'unk', seq:[ pos('food'), "going east", "food court", "one of the chairs is pulled out. like somebody just got up", "i see the exit sign", pos('east'), "it says EMERGENCY EXIT ONLY. ALARM WILL SOUND" ],
+    ch:[ { t:"Push it.", go:'east_out' }, { t:"Check behind you first.", go:'east_look' } ] },
+  east_look: { th:'unk', seq:[ s => s.strikes > 0 ? ["its there", "its right behind me. its so close", "the music isnt playing", "it doesnt have to wait"] : ["nothing", "nothing there. pushing"] ], go: s => s.strikes > 0 ? 'caught' : 'east_out' },
+  east_out: { th:'unk', seq:[ voice('alarm','0:05'), "IM OUT", "the alarm is going off. good. let it", "running to my car", wait(2500), clock('12:49'), "in the car", "doors locked. im shaking",
+    wait(3200), to('mira', img('lot')), to('mira',"Fire exits are for emergencies only."), to('mira',"We’ll be open next weekend.") ], end:'east' },
+  caught_east: { th:'unk', seq:[ pos('food'), "going east", "food court", "its sitting at a table", "its sitting at a table facing me", "its standing up" ], go:'caught' },
+
+  audio: { th:'unk', seq:[ pos('center'), "center court. the escalator", "going up", pos('l2'), "its so dark up here", "AUDIO RM. keypad", s => s.knowsDeadline && "the one i couldnt open before", "whats the code", "if u know it tell me NOW" ],
+    ch: codeChoices },
+  audio_wrong: { th:'unk', seq:[ fx(s => s.strikes++), "its beeping", "red light. wrong",
+    s => s.strikes >= 2 ? ["i hear it on the escalator", "tk tk tk", "its at the top"] : ["i hear it downstairs", "tk. tk.", "TELL ME THE CODE"] ],
+    go: s => s.strikes >= 2 ? 'caught' : null, ch: codeChoices },
+  audio_ok: { th:'unk', seq:[ "GREEN", "its open", "theres a cd changer thing. PLAYLIST 4 NIGHT", "theres a play button", "pressing it", wait(1200),
+    "im calling u. i want u to hear it", fx(() => callStart('unk','A',{ warped:true })), wait(4800), img('audio'), "it sounds wrong. slower",
+    "41 minutes on the screen", "ok. i have to walk out", "its at the bottom of the escalator", img('escal'), "its holding my phone", "the music is on and its not moving" ],
+    ch:[ { t:"Walk past it. Now. Before the song ends.", go:'hours' }, { t:"Take your phone back.", go: s => s.strikes === 0 ? 'lost' : 'caught_phone' }, { t:"Stay up there until morning.", go:'stay' } ] },
+  hours: { th:'unk', seq:[ "ok", "walking", "on the escalator", "im next to it", wait(1500), "im past it", "im past it", "front doors are chained. going to the dock", pos('westcorr'),
+    wait(1500), "the song is ending", music('B', 3400), wait(4000), "IM OUT", "im outside", fx(() => callEnd()), wait(1800), clock('12:58'), "in the car", img('exterior'),
+    "look at the doors", "its standing behind the glass", "its just watching me go", wait(3600),
+    to('mira',"Thank you for shopping at Fairhaven Galleria."), to('mira',"We’ll keep your phone at Lost & Found.") ], end:'hours' },
+  lost: { th:'unk', seq:[ "ok", "walking down", "its right there", "its arm is out. its holding the phone out to me", "like its giving it back", wait(1800), "GOT IT", "running",
+    pos('dock'), wait(1500), "the song is ending", music('B', 3400), wait(3800), "out. im out", fx(() => callEnd()), wait(2500), clock('12:58'),
+    fx(s => { s.imp = false; s.threads.mira.status = 'online'; refreshChrome(); }),
+    to('mira',"its me"), to('mira',"its really me. my real phone"), to('mira',"never again. never ever again"), to('mira', img('exterior')), to('mira',"i dropped the kiosk phone somewhere in there"),
+    wait(6500), fx(s => s.unkImp = true), "We’ll see you next weekend." ], end:'lost' },
+  caught_phone: { th:'unk', seq:[ "ok", "walking down", "reaching for it", "the song is ending", music('B', 5000), wait(4600) ], go:'caught' },
+  stay: { th:'unk', seq:[ "ok", "staying", wait(2600), "the song is ending", music('B', 5000), wait(4600), "its not at the bottom anymore", "where is it" ], go:'caught' },
+
+  caught: { th:'unk', seq:[ fx(() => { if (S.call) callEnd(); }), wait(2500), fake(1800), wait(3200), fake(2600), wait(2600), fx(s => s.unkImp = true),
+    "Okay.", "I’m out.", "Thank you for staying with me.", wait(3600), to('mira', img('window',{ bad:1 })), to('mira',"Dress the floor.") ], end:'floor' }
+};
+
+const ENDINGS = {
+  window: { name:'Window Display', line:'You told her to stop texting. She did.' },
+  floor:  { name:'Dress the Floor', line:'It reached her before the music did.' },
+  dock:   { name:'Loading Dock', line:'She got out. Her coat stayed for the display.' },
+  east:   { name:'Alarm Will Sound', line:'She got out the fire exit. Something watched her car leave.' },
+  hours:  { name:'Store Hours', line:'You turned the music back on. It kept her phone.' },
+  lost:   { name:'Lost & Found', line:'She got everything back. Almost everything.' }
+};
+const ENDING_ORDER = ['window','floor','dock','east','hours','lost'];
+
+/* ============================================================
+   STATE & UI
+   ============================================================ */
+const newState = () => ({
+  node:null, clock:'11:47', pos:'dock', sightings:[], log:[], order:['mira'],
+  threads:{ mira:{ name:'Mira', unread:0, visible:true, last:'', lastT:'', status:'online', lastClock:null },
+            unk:{ name:'+1 (555) 013-7742', unread:0, visible:false, last:'', lastT:'', status:'online', lastClock:null } },
+  strikes:0, tried:[], imp:false, unkImp:false, half:1, call:null, mapUnlocked:false, mLoc:null
+});
+let S = newState();
+let view = 'lock', curChoices = null, choiceTh = null, busy = false, ended = false;
+const boxes = { mira: $('#m-mira'), unk: $('#m-unk') };
+const receipts = { mira:null, unk:null };
+const typingNow = { mira:false, unk:false };
+
+function div(cls, html){ const d = document.createElement('div'); d.className = cls; if (html != null) d.innerHTML = html; return d; }
+function preview(e){ return e.k === 'img' ? '📷 Photo' : e.k === 'voice' ? '🎤 Voice message' : e.k === 'me' ? 'You: ' + e.text : e.text; }
+function scrollDown(th){ const b = boxes[th]; requestAnimationFrame(() => { b.scrollTop = b.scrollHeight; }); }
+
+function renderEntry(e, anim){
+  const box = boxes[e.th]; let el;
+  if (e.k === 'time') el = div('tdiv', esc(fmtClock(e.text)));
+  else if (e.k === 'sys') el = div('sys' + (e.call ? ' call' : ''), esc(e.text));
+  else if (e.k === 'm') el = div('b in', esc(e.text));
+  else if (e.k === 'me') el = div('b out', esc(e.text));
+  else if (e.k === 'img'){
+    el = div('b in photo', SCENES[e.scene](e.o || {}));
+    el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Photo — tap to enlarge');
+    if (anim){ el.classList.add('loading'); setTimeout(() => el.classList.remove('loading'), 60 + Math.random() * 300); }
+    el.addEventListener('click', ev => { ev.stopPropagation(); openLightbox(e); });
+  } else if (e.k === 'voice'){
+    const r = rng(e.sound.length * 7 + 3); let bars = '';
+    for (let i = 0; i < 30; i++) bars += `<i style="height:${4 + Math.round(r() * 20)}px;animation-delay:${(i % 6) * .08}s"></i>`;
+    el = div('b in voice', `<button class="vplay" aria-label="Play voice message">▶</button><span class="wave">${bars}</span><span class="vdur">${e.dur}</span>`);
+    el.querySelector('.vplay').addEventListener('click', ev => { ev.stopPropagation(); AU.voice(e.sound); el.classList.add('playing'); setTimeout(() => el.classList.remove('playing'), e.sound === 'muzak' ? 7000 : 4800); });
+  }
+  if (!el) return;
+  if (e.k === 'me'){ if (receipts[e.th]) receipts[e.th].remove(); box.appendChild(el); const rc = div('receipt', 'Delivered'); box.appendChild(rc); receipts[e.th] = rc; }
+  else { if ((e.k === 'm' || e.k === 'img' || e.k === 'voice') && receipts[e.th] && receipts[e.th].textContent === 'Delivered') receipts[e.th].textContent = 'Read'; box.appendChild(el); }
+  if (anim) scrollDown(e.th);
+}
+function addEntry(e, anim = true){ S.log.push(e); renderEntry(e, anim); }
+
+function stamp(th){ const T = S.threads[th]; if (T.lastClock !== S.clock){ T.lastClock = S.clock; addEntry({ th, k:'time', text:S.clock }); } }
+function bump(th){ S.order = [th, ...S.order.filter(x => x !== th)]; }
+
+function deliver(th, e){
+  e.th = th; const T = S.threads[th]; T.visible = true;
+  stamp(th); addEntry(e);
+  if (e.k !== 'sys'){ T.last = preview(e); T.lastT = S.clock; bump(th); }
+  if (e.k === 'sys'){ refreshChrome(); return; }
+  if (view !== th){ T.unread++; notify(th, preview(e)); AU.sfx('buzz'); }
+  else AU.sfx('recv');
+  refreshChrome();
+}
+function isImp(th){ return (th === 'mira' && S.imp) || (th === 'unk' && S.unkImp); }
+async function typing(th, ms){
+  const el = div('typing', '<i></i><i></i><i></i>'); boxes[th].appendChild(el); typingNow[th] = true; refreshChrome(); scrollDown(th);
+  await sleep(ms);
+  el.remove(); typingNow[th] = false; refreshChrome();
+}
+async function incoming(th, e){
+  const imp = isImp(th);
+  const ms = e.k === 'img' ? 1700 : e.k === 'voice' ? 1900 : imp ? 2000 + e.text.length * 14 : Math.min(2500, 420 + e.text.length * 34);
+  await typing(th, ms);
+  deliver(th, e);
+  await sleep(imp ? 650 : 240);
+}
+
+/* ---------- step runner ---------- */
+async function exec(st, node){
+  if (st == null || st === false) return;
+  if (typeof st === 'function') return exec(st(S), node);
+  if (Array.isArray(st)){ for (const x of st) await exec(x, node); return; }
+  if (typeof st === 'string') st = { k:'m', text:st };
+  const th = st.th || node.th;
+  switch (st.k){
+    case 'm': await incoming(th, { k:'m', text:st.text }); break;
+    case 'img': await incoming(th, { k:'img', scene:st.scene, o:st.o }); break;
+    case 'voice': await incoming(th, { k:'voice', sound:st.sound, dur:st.dur }); break;
+    case 'sys': deliver(th, { k:'sys', text:st.text }); await sleep(400); break;
+    case 'wait': await sleep(st.ms); break;
+    case 'fake': await typing(th, st.ms); break;
+    case 'fx': await st.fn(S); break;
+    case 'clock': S.clock = st.v; refreshChrome(); break;
+    case 'pos': S.pos = st.v; if ($('#mapsheet').classList.contains('show')) $('#mapWrap').innerHTML = mapSVG(); break;
+    case 'sight': S.sightings.push({ loc:st.v, t:S.clock }); break;
+    case 'music': if (S.call){ S.call.track = st.v; AU.change(st.v, st.gap); } break;
+    case 'sfx': AU.sfx(st.v); break;
+    case 'status': S.threads[st.th].status = st.v; refreshChrome(); break;
+    case 'credits': await runCredits(); break;
+  }
+}
+async function runNode(id){
+  const n = STORY[id]; if (!n){ console.error('missing node', id); return; }
+  S.node = id; busy = true; updateComposer();
+  for (const st of (n.seq || [])) await exec(st, n);
+  if (n.end){ busy = false; return finish(n.end); }
+  let go = typeof n.go === 'function' ? n.go(S) : n.go;
+  if (go) return runNode(go);
+  busy = false;
+  presentChoices(n.th, resolveChoices(n));
+  save();
+}
+function resolveChoices(n){ return (typeof n.ch === 'function' ? n.ch(S) : n.ch).filter(c => !c.if || c.if(S)); }
+
+/* ---------- choices ---------- */
+function presentChoices(th, list){ curChoices = list; choiceTh = th; renderChips(); updateComposer(); if (view !== th && view !== 'lock') showBanner(th, 'Waiting for your reply'); }
+function renderChips(){
+  const box = $('#chips'); box.innerHTML = '';
+  if (!curChoices || view !== choiceTh) return;
+  curChoices.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'chip'; b.style.animationDelay = (i * .07) + 's';
+    b.innerHTML = `<span class="n">${i + 1}</span>${esc(c.t)}`;
+    b.addEventListener('click', () => choose(i)); box.appendChild(b);
+  });
+  scrollDown(choiceTh);
+}
+function updateComposer(){
+  const inp = $('#input');
+  if (!inp.classList.contains('on')) inp.textContent = (curChoices && view === choiceTh) ? 'Choose a reply' : 'Text message';
+}
+async function choose(i){
+  if (!curChoices || busy) return;
+  const c = curChoices[i]; if (!c) return;
+  const th = choiceTh; curChoices = null; renderChips(); busy = true;
+  const inp = $('#input'); inp.classList.add('on'); inp.textContent = ''; $('#sendBtn').classList.add('on');
+  for (let k = 0; k < c.t.length; k++){ inp.textContent += c.t[k]; if (k % 2 === 0) AU.sfx('tick'); await sleepRaw(c.t.length > 30 ? 13 : 22); }
+  await sleepRaw(160);
+  inp.classList.remove('on'); $('#sendBtn').classList.remove('on'); inp.textContent = 'Text message';
+  AU.sfx('send');
+  const T = S.threads[th]; stamp(th); addEntry({ th, k:'me', text:c.t }); T.last = 'You: ' + c.t; T.lastT = S.clock; bump(th); refreshChrome();
+  if (c.set) Object.assign(S, c.set);
+  if (c.add) for (const k in c.add) S[k] = (S[k] || 0) + c.add[k];
+  if (c.fx) c.fx(S);
+  await sleepRaw(550);
+  const go = typeof c.go === 'function' ? c.go(S) : c.go;
+  runNode(go);
+}
+
+/* ---------- calls ---------- */
+let callTimer = null;
+function callStart(th, track, o = {}){
+  S.call = { th, track, warped: !!o.warped, t0: Date.now() };
+  AU.callStart(track, o);
+  deliver(th, { k:'sys', call:1, text: th === 'mira' ? (S.imp ? '📞 Mira started a voice call' : '📞 Mira started a voice call · muted on her end') : '📞 +1 (555) 013-7742 is calling · connected' });
+  refreshChrome();
+}
+function callEnd(silent){
+  if (!S.call) return;
+  const sec = Math.round((Date.now() - S.call.t0) / 1000), th = S.call.th;
+  AU.callEnd(silent); S.call = null;
+  deliver(th, { k:'sys', call:1, text: `Call ended · ${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}` });
+  refreshChrome();
+}
+function tickCall(){
+  if (!S.call) return; const sec = Math.round((Date.now() - S.call.t0) / 1000);
+  $('#cbTime').textContent = `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`;
+}
+
+/* ---------- chrome ---------- */
+function refreshChrome(){
+  const th = (view === 'mira' || view === 'unk') ? view : null;
+  if (th){
+    const T = S.threads[th];
+    $('#hName').textContent = T.name; const av = $('#hAv'); av.textContent = th === 'mira' ? 'M' : '#'; av.className = 'av ' + th;
+    const hs = $('#hStatus'); hs.textContent = typingNow[th] ? 'typing…' : T.status; hs.classList.toggle('ty', typingNow[th]);
+    const other = Object.keys(S.threads).filter(k => k !== th).reduce((a, k) => a + S.threads[k].unread, 0);
+    const bb = $('#backBadge'); bb.hidden = !other; bb.textContent = other;
+  }
+  $('#mapBtn').hidden = !S.mapUnlocked;
+  const cb = $('#callbar');
+  if (S.call){ cb.classList.add('on'); $('#cbLabel').textContent = S.call.th === 'mira' ? (S.half === 1 && !S.imp ? 'Mira · voice call · muted on her end' : 'Mira · voice call') : '+1 (555) 013-7742 · voice call'; tickCall(); }
+  else cb.classList.remove('on');
+  $('#sbTime').textContent = S.clock; $('#lkTime').textContent = S.clock;
+  $('#lkDate').textContent = S.half === 2 || parseInt(S.clock, 10) !== 11 ? 'Sunday, November 1' : 'Saturday, October 31';
+  renderList();
+}
+function renderList(){
+  const box = $('#threads'); box.innerHTML = '';
+  S.order.forEach(k => {
+    const T = S.threads[k]; if (!T.visible) return;
+    const b = document.createElement('button'); b.className = 'thread';
+    const ty = typingNow[k];
+    b.innerHTML = `<div class="av ${k}">${k === 'mira' ? 'M' : '#'}</div><div class="tx"><div class="tn">${esc(T.name)}<span>${T.lastT ? esc(fmtClock(T.lastT)) : ''}</span></div><div class="tp${ty ? ' ty' : ''}">${ty ? 'typing…' : esc(T.last || '')}</div></div>${T.unread ? `<div class="ub">${T.unread}</div>` : ''}`;
+    b.addEventListener('click', () => setView(k)); box.appendChild(b);
+  });
+}
+function setView(v){
+  view = v;
+  ['lock','list','chat'].forEach(id => $('#' + id).classList.toggle('on', (v === 'mira' || v === 'unk') ? id === 'chat' : id === v));
+  if (v === 'mira' || v === 'unk'){
+    Object.keys(boxes).forEach(k => boxes[k].classList.toggle('on', k === v));
+    S.threads[v].unread = 0; scrollDown(v);
+    hideBanner();
+  }
+  if (v !== 'lock') $('#lkNotes').innerHTML = '';
+  moveWall(); renderChips(); updateComposer(); refreshChrome();
+}
+
+/* ---------- notifications ---------- */
+let bannerTimer = null, bannerTh = null;
+function noteHTML(th, text){ const T = S.threads[th]; return `<div class="av ${th}" style="width:34px;height:34px;font-size:14px">${th === 'mira' ? 'M' : '#'}</div><div class="nt"><div class="nh"><b>${esc(T.name)}</b><span>now</span></div><div class="nb">${esc(text)}</div></div>`; }
+function notify(th, text){
+  if ($('#credits').classList.contains('on')){ const n = $('#crNote'); n.innerHTML = noteHTML(th, text); n.classList.add('show'); n.onclick = ev => { ev.stopPropagation(); closeCredits(th); }; return; }
+  if (view === 'lock'){
+    const notes = $('#lkNotes'); const b = document.createElement('button'); b.className = 'note'; b.innerHTML = noteHTML(th, text);
+    b.addEventListener('click', () => setView(th)); notes.prepend(b);
+    while (notes.children.length > 4) notes.lastChild.remove();
+    return;
+  }
+  showBanner(th, text);
+}
+function showBanner(th, text){
+  const bn = $('#banner'); bn.innerHTML = noteHTML(th, text); bn.classList.add('show'); bannerTh = th;
+  clearTimeout(bannerTimer); bannerTimer = setTimeout(hideBanner, 4200);
+}
+function hideBanner(){ $('#banner').classList.remove('show'); }
+$('#banner').addEventListener('click', () => { if (bannerTh) setView(bannerTh); });
+
+/* ---------- the thing in the wallpaper ---------- */
+function moveWall(){
+  const w = $('#wall'); const r = Math.random;
+  const flip = r() < .5 ? -1 : 1, left = 4 + r() * 70, hgt = 40 + r() * 34;
+  w.innerHTML = `<svg viewBox="-20 -105 40 110" style="left:${left}%;height:${hgt}%;transform:scaleX(${flip})">${mq(0, 0, 100, { face: r() < .3 ? 'away' : 'front', tilt: (r() - .5) * 24 })}</svg>`;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) moveWall(); });
+
+/* ---------- map & lightbox ---------- */
+function openMap(){ $('#mapWrap').innerHTML = mapSVG(); $('#mapsheet').classList.add('show'); $('#mapBtn').classList.remove('pulse'); }
+function closeMap(){ $('#mapsheet').classList.remove('show'); moveWall(); }
+$('#mapBtn').addEventListener('click', openMap);
+$('#closeMap').addEventListener('click', closeMap);
+function openLightbox(e){ $('#lbImg').innerHTML = SCENES[e.scene](e.o || {}); $('#lbMeta').textContent = (SCENE_META[e.scene] || 'IMG') + '.HEIC · tap to close'; $('#lightbox').classList.add('on'); }
+$('#lightbox').addEventListener('click', () => { $('#lightbox').classList.remove('on'); moveWall(); });
+
+/* ---------- misc controls ---------- */
+$('#backBtn').addEventListener('click', () => setView('list'));
+$('#chatBody').addEventListener('click', () => { if (hurryFn) hurryFn(); });
+function setSoundIcon(){ $('#sndOn').toggleAttribute('hidden', AU.muted); $('#sndOff').toggleAttribute('hidden', !AU.muted); $('#soundBtn').setAttribute('aria-label', AU.muted ? 'Unmute sound' : 'Mute sound'); }
+$('#soundBtn').addEventListener('click', () => { AU.setMuted(!AU.muted); setSoundIcon(); });
+$('#callbar').addEventListener('click', () => { AU.setMuted(!AU.muted); setSoundIcon(); });
+document.addEventListener('keydown', e => {
+  if ($('#lightbox').classList.contains('on') && (e.key === 'Escape' || e.key === ' ')){ $('#lightbox').classList.remove('on'); return; }
+  if (e.key === 'Escape' && $('#mapsheet').classList.contains('show')){ closeMap(); return; }
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4 && curChoices && view === choiceTh) choose(n - 1);
+  else if ((e.key === ' ' || e.key === 'Enter') && hurryFn && document.activeElement === document.body){ e.preventDefault(); hurryFn(); }
+});
+setInterval(tickCall, 1000);
+
+/* ============================================================
+   CREDITS — halfway through
+   ============================================================ */
+const CREDITS = [
+  ['gap'],['big','The Mannequin<br>in the Dead Mall'],['gap'],
+  ['role','Starring'],['pair','Mira','as herself'],['pair','You','as the one who stayed up'],['pair','The Mannequin','as itself'],['gap'],
+  ['role','Location'],['name','Fairhaven Galleria'],['small','1988 — 2011'],['gap'],
+  ['role','In-Store Music'],['name','Fairhaven Galleria Audio Network'],['small','“Sunlit Concourse”'],['small','“Escalator Dreams”'],['small','“Food Court Rain”'],['small','“Thank You for Shopping”'],['gap'],
+  ['role','Night Close'],['small','1. Confirm PA playlist runs until 12:30'],['small','2. Lock audio room'],['small','3. Dress the floor'],['gap'],
+  ['role','Floor Staff'],['name','—'],['gap'],
+  ['role','Special Thanks'],['name','Everyone who came to see us'],['small','and everyone who stayed'],['gap'],
+  ['small','No mannequins were harmed in the making of this story.'],['gap'],['gap'],
+  ['pair','Mira','still inside','glitch'],['gap'],['gap'],
+  ['name','Thank you for shopping at Fairhaven Galleria.'],['small','The mall is now closed.'],['gap'],['gap'],
+  ['end','THE END']
+];
+let creditsFast = false;
+function runCredits(){
+  return new Promise(async resolve => {
+    const cr = $('#credits'), roll = $('#roll');
+    roll.innerHTML = CREDITS.map(([k, a, b, c]) => k === 'gap' ? '<div class="gap"></div>' : k === 'pair' ? `<div class="pair${c ? ' ' + c : ''}"><span>${a}</span><span>${b}</span></div>` : `<div class="${k}">${a}</div>`).join('');
+    cr.classList.add('on'); creditsFast = false;
+    const H = cr.clientHeight, endEl = roll.querySelector('.end');
+    let y = H; roll.style.transform = `translateY(${y}px)`;
+    const stopAt = -(endEl.offsetTop - H / 2 + endEl.offsetHeight / 2);
+    let last = performance.now();
+    await new Promise(done => {
+      const step = now => {
+        const dt = Math.min(64, now - last); last = now;
+        y -= dt / 1000 * (creditsFast ? 190 : 36);
+        if (y <= stopAt){ y = stopAt; roll.style.transform = `translateY(${y}px)`; done(); return; }
+        roll.style.transform = `translateY(${y}px)`; requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    $('#crHint').hidden = true;
+    AU.fadeMusic(5);
+    await sleepRaw(5600);
+    callEnd(true);
+    S.half = 2; S.imp = true; S.threads.mira.status = 'online';
+    AU.drone(true);
+    await sleepRaw(4200);
+    setView('lock');
+    resolve();
+  });
+}
+function closeCredits(th){ const cr = $('#credits'); cr.classList.remove('on'); $('#crNote').classList.remove('show'); setView(th || 'lock'); }
+$('#credits').addEventListener('click', () => { creditsFast = true; });
+
+/* ============================================================
+   ENDINGS, SAVE, BOOT
+   ============================================================ */
+async function finish(key){
+  ended = true; store.del('tmdm_save');
+  const got = store.get('tmdm_endings', []); if (!got.includes(key)) got.push(key); store.set('tmdm_endings', got);
+  await sleepRaw(3200);
+  if (S.call) callEnd(true);
+  AU.drone(false); AU.quiet();
+  const E = ENDINGS[key];
+  $('#enName').textContent = E.name; $('#enLine').textContent = E.line;
+  $('#enList').innerHTML = ENDING_ORDER.map(k => `<div class="${k === key ? 'cur' : got.includes(k) ? 'got' : ''}">${got.includes(k) ? ENDINGS[k].name : '· · ·'}</div>`).join('') + `<div style="grid-column:1/-1;margin-top:6px;color:#8a8f8c">${got.length} of ${ENDING_ORDER.length} endings found</div>`;
+  $('#ending').classList.add('on');
+}
+function restart(){ store.del('tmdm_save'); location.reload(); }
+$('#enAgain').addEventListener('click', restart);
+$('#againPill').addEventListener('click', restart);
+$('#enRead').addEventListener('click', () => { $('#ending').classList.remove('on'); $('#againPill').hidden = false; });
+
+function save(){ if (ended) return; store.set('tmdm_save', { v:1, S }); }
+function restore(data){
+  S = data.S;
+  S.log.forEach(e => renderEntry(e, false));
+  Object.keys(boxes).forEach(scrollDown);
+  if (S.call){ S.call.t0 = Date.now(); AU.callStart(S.call.track, { warped: S.call.warped }); }
+  if (S.half === 2) AU.drone(true);
+  const n = STORY[S.node];
+  setView(n.th);
+  presentChoices(n.th, resolveChoices(n));
+}
+
+function titleScene(){
+  const visits = store.get('tmdm_visits', 0);
+  const spots = [[10,11.5,{dim:1,face:'away'}],[-70,5.2,{dim:1}],[80,3.6,{dim:1,tilt:10}],null,[-20,2.1,{dim:1}],[40,7,{dim:1}],[0,1.25,{tilt:-8}]];
+  const sp = spots[visits % spots.length];
+  const b = corridorBase(); let s = b.s + westHall(b) + shop(b,'R',2.1,3.2) + exitSign(b);
+  if (sp) s += mq(...b.p(sp[0], b.F, sp[1]), 172 / sp[1], sp[2]);
+  $('#titleBg').innerHTML = wrap(s).replace('preserveAspectRatio="xMidYMid slice"', 'preserveAspectRatio="xMidYMid slice"');
+  store.set('tmdm_visits', visits + 1);
+  const got = store.get('tmdm_endings', []);
+  if (got.length) $('#endFound').textContent = `${got.length} of ${ENDING_ORDER.length} endings found`;
+}
+
+function boot(){
+  titleScene(); moveWall(); setSoundIcon(); refreshChrome();
+  const saved = store.get('tmdm_save', null);
+  if (saved && saved.S && STORY[saved.S.node]) $('#contBtn').hidden = false;
+  $('#beginBtn').addEventListener('click', () => {
+    AU.init(); store.del('tmdm_save');
+    $('#title').style.transition = 'opacity 1.4s'; $('#title').style.opacity = 0;
+    setTimeout(() => { $('#title').remove(); }, 1400);
+    setView('lock');
+    setTimeout(() => runNode('start'), 1600);
+  });
+  $('#contBtn').addEventListener('click', () => {
+    AU.init();
+    $('#title').style.transition = 'opacity 1s'; $('#title').style.opacity = 0;
+    setTimeout(() => { $('#title').remove(); }, 1000);
+    restore(saved);
+  });
+}
+boot();
+</script>
+</body>
+</html>
